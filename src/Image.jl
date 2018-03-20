@@ -8,11 +8,11 @@ struct Image
     regions::Array{String, 1}
     min_disk_size::Integer
     size_gigabytes::Real
-    created_at::DateTime
+    created_at::Dates.DateTime
 
     function Image(data::Dict{String, Any})
         # we assume all DO datetimes are in UTC
-        data["created_at"] = DateTime(data["created_at"][1:end-1])
+        data["created_at"] = Dates.DateTime(data["created_at"][1:end-1])
 
         new(
             data["id"],

@@ -7,7 +7,7 @@ mutable struct Manager
     token::String
     ratelimit_limit::Integer
     ratelimit_remaining::Integer
-    ratelimit_reset::DateTime
+    ratelimit_reset::Dates.DateTime
     # constructor
     Manager(token::String) = begin
         new(token, -1, -1, now())
