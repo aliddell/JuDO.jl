@@ -6,6 +6,18 @@ struct Account
     email_verified::Bool
     status::String
     status_message::String
+
+    function Account(data::Dict{String, Any})
+        new(
+            data["droplet_limit"],
+            data["floating_ip_limit"],
+            data["email"],
+            data["uuid"],
+            data["email_verified"],
+            data["status"],
+            data["status_message"]
+        )
+    end
 end
 
 function show(io::IO, a::Account)
@@ -19,18 +31,8 @@ function get_account(manager::Manager)
         body = JSON.parse(String(response.body))
         data = body["account"]
 
-        account = Account(
-            data["droplet_limit"],
-            data["floating_ip_limit"],
-            data["email"],
-            data["uuid"],
-            data["email_verified"],
-            data["status"],
-            data["status_message"]
-        )
+        account = Account(data)
     else
         error("Received error $(response.status)")
     end
-
-    account
 end

@@ -12,6 +12,7 @@ include("Domain.jl")
 include("Image.jl")
 include("Region.jl")
 include("Size.jl")
+include("SSHKey.jl")
 include("Droplet.jl")
 
 end # module
