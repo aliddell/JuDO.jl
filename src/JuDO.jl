@@ -8,6 +8,7 @@ export get_account
 include("Manager.jl")
 
 include("Account.jl")
+include("Domain.jl")
 include("Image.jl")
 include("Region.jl")
 include("Size.jl")

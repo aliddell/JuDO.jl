@@ -36,3 +36,45 @@ function get_data(manager::Manager, url::String)
 
     response
 end
+
+function post_data(manager::Manager, url::String, body::Dict{String, Any})
+    headers = Dict("Content-Type" => "application/json",
+                   "Authorization" => "Bearer $(manager.token)")
+    body = JSON.json(body)
+    response = 0
+
+    try
+        response = HTTP.post(url, headers=headers, body=body)
+    catch er
+        error("Received error $(er.status)")
+    end
+
+    headers = response.headers
+    manager.ratelimit_limit = parse(headers["Ratelimit-Limit"])
+    manager.ratelimit_remaining = parse(headers["Ratelimit-Remaining"])
+    manager.ratelimit_reset = Dates.unix2datetime(parse(headers["Ratelimit-Reset"]))
+
+    response
+end
+
+function delete_data(manager::Manager, url::String)
+    headers = Dict("Content-Type" => "application/json",
+                   "Authorization" => "Bearer $(manager.token)")
+    response = 0
+    try
+       response = HTTP.request("DELETE", url, headers=headers)
+    catch er
+       error("Received error $(er.status)")
+    end
+
+    if response.status != 204
+        error("Received error $(response.status)")
+    end
+
+    headers = response.headers
+    manager.ratelimit_limit = parse(headers["Ratelimit-Limit"])
+    manager.ratelimit_remaining = parse(headers["Ratelimit-Remaining"])
+    manager.ratelimit_reset = Dates.unix2datetime(parse(headers["Ratelimit-Reset"]))
+
+    return
+end

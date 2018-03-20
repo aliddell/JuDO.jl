@@ -4,6 +4,16 @@ struct Region
     sizes::Array{String, 1}
     available::Bool
     features::Array{String, 1}
+
+    function Region(data::Dict{String, Any})
+        new(
+            data["slug"],
+            data["name"],
+            data["sizes"],
+            data["available"],
+            data["features"]
+        )
+    end
 end
 
 function show(io::IO, r::Region)
@@ -22,13 +32,7 @@ function get_all_regions(manager::Manager)
         regions = Array{Region, 1}(meta["total"])
 
         for (i, region) in enumerate(data)
-            regions[i] = Region(
-                region["slug"],
-                region["name"],
-                region["sizes"],
-                region["available"],
-                region["features"]
-            )
+            regions[i] = Region(region)
         end
     else
         error("Received error $(response.status)")

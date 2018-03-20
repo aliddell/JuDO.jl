@@ -8,6 +8,20 @@ struct Size
     vcpus::Integer
     disk::Integer
     regions::Array{String, 1}
+
+    function Size(data::Dict{String, Any})
+        new(
+            data["slug"],
+            data["available"],
+            data["transfer"],
+            data["price_monthly"],
+            data["price_hourly"],
+            data["memory"],
+            data["vcpus"],
+            data["disk"],
+            data["regions"]
+        )
+    end
 end
 
 function show(io::IO, s::Size)
@@ -26,17 +40,7 @@ function get_all_sizes(manager::Manager)
         sizes = Array{Size, 1}(meta["total"])
 
         for (i, dsize) in enumerate(data)
-            sizes[i] = Size(
-                dsize["slug"],
-                dsize["available"],
-                dsize["transfer"],
-                dsize["price_monthly"],
-                dsize["price_hourly"],
-                dsize["memory"],
-                dsize["vcpus"],
-                dsize["disk"],
-                dsize["regions"]
-            )
+            sizes[i] = Size(dsize)
         end
     else
         error("Received error $(response.status)")
