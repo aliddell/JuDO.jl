@@ -29,8 +29,7 @@ function get_data(manager::Manager, url::String)
         error("Received error $(er.status)")
     end
 
-    headers = response.headers
-    println(headers)
+    headers = Dict(response.headers)
     manager.ratelimit_limit = parse(headers["Ratelimit-Limit"])
     manager.ratelimit_remaining = parse(headers["Ratelimit-Remaining"])
     manager.ratelimit_reset = Dates.unix2datetime(parse(headers["Ratelimit-Reset"]))
@@ -50,7 +49,7 @@ function post_data(manager::Manager, url::String, body::Dict{String})
         error("Received error $(er.status)")
     end
 
-    headers = response.headers
+    headers = Dict(response.headers)
     manager.ratelimit_limit = parse(headers["Ratelimit-Limit"])
     manager.ratelimit_remaining = parse(headers["Ratelimit-Remaining"])
     manager.ratelimit_reset = Dates.unix2datetime(parse(headers["Ratelimit-Reset"]))
@@ -70,7 +69,7 @@ function put_data(manager::Manager, url::String, body::Dict{String})
         error("Received error $(er.status)")
     end
 
-    headers = response.headers
+    headers = Dict(response.headers)
     manager.ratelimit_limit = parse(headers["Ratelimit-Limit"])
     manager.ratelimit_remaining = parse(headers["Ratelimit-Remaining"])
     manager.ratelimit_reset = Dates.unix2datetime(parse(headers["Ratelimit-Reset"]))
@@ -93,7 +92,7 @@ function delete_data(manager::Manager, url::String)
         error("Received error $(response.status)")
     end
 
-    headers = response.headers
+    headers = Dict(response.headers)
     manager.ratelimit_limit = parse(headers["Ratelimit-Limit"])
     manager.ratelimit_remaining = parse(headers["Ratelimit-Remaining"])
     manager.ratelimit_reset = Dates.unix2datetime(parse(headers["Ratelimit-Reset"]))
