@@ -4,7 +4,7 @@ struct Network
     netmask::String
     ntype::String
 
-    function Network(data::Dict{String, Any})
+    function Network(data::Dict{String})
         new(
             data["gateway"],
             data["ip_address"],
@@ -23,7 +23,7 @@ struct Kernel
     name::String
     version::String
 
-    function Kernel(data::Dict{String, Any})
+    function Kernel(data::Dict{String})
         new(
             data["id"],
             data["name"],
@@ -58,7 +58,7 @@ struct Droplet
     tags::Array{String, 1}
     volume_ids::Array{Integer, 1}
 
-    function Droplet(data::Dict{String, Any})
+    function Droplet(data::Dict{String})
         # we assume all DO datetimes are in UTC
         data["created_at"] = Dates.DateTime(data["created_at"][1:end-1])
 

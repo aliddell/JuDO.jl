@@ -5,7 +5,7 @@ struct Region
     available::Bool
     features::Array{String, 1}
 
-    function Region(data::Dict{String, Any})
+    function Region(data::Dict{String})
         new(
             data["slug"],
             data["name"],

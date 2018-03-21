@@ -9,7 +9,7 @@ struct Size
     disk::Integer
     regions::Array{String, 1}
 
-    function Size(data::Dict{String, Any})
+    function Size(data::Dict{String})
         new(
             data["slug"],
             data["available"],

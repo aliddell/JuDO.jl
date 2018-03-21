@@ -3,7 +3,7 @@ struct Domain
     ttl::Integer
     zone_file::String
 
-    function Domain(data::Dict{String, Any})
+    function Domain(data::Dict{String})
         new(
             data["name"],
             data["ttl"],

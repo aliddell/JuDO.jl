@@ -4,7 +4,7 @@ struct SSHKey
     public_key::String
     name::String
 
-    function SSHKey(data::Dict{String, Any})
+    function SSHKey(data::Dict{String})
         new(
             data["id"],
             data["fingerprint"],

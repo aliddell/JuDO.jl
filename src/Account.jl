@@ -7,7 +7,7 @@ struct Account
     status::String
     status_message::String
 
-    function Account(data::Dict{String, Any})
+    function Account(data::Dict{String})
         new(
             data["droplet_limit"],
             data["floating_ip_limit"],

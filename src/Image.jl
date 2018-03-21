@@ -10,7 +10,7 @@ struct Image
     size_gigabytes::Real
     created_at::Dates.DateTime
 
-    function Image(data::Dict{String, Any})
+    function Image(data::Dict{String})
         # we assume all DO datetimes are in UTC
         data["created_at"] = Dates.DateTime(data["created_at"][1:end-1])
 

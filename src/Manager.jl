@@ -1,6 +1,3 @@
-import HTTP
-import JSON
-
 ENDPOINT = "https://api.digitalocean.com/v2/"
 
 mutable struct Manager
