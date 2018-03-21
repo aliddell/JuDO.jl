@@ -30,6 +30,7 @@ function get_data(manager::Manager, url::String)
     end
 
     headers = response.headers
+    println(headers)
     manager.ratelimit_limit = parse(headers["Ratelimit-Limit"])
     manager.ratelimit_remaining = parse(headers["Ratelimit-Remaining"])
     manager.ratelimit_reset = Dates.unix2datetime(parse(headers["Ratelimit-Reset"]))
