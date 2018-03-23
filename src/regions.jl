@@ -20,10 +20,10 @@ function show(io::IO, r::Region)
     print(io, "Region ($(r.name))")
 end
 
-function get_all_regions(manager::Manager)
-    response = get_data(manager, joinpath(ENDPOINT, "regions?per_page=200"))
+function get_all_regions(client::AbstractClient)
+    response = get_data(client, joinpath(ENDPOINT, "regions?per_page=200"))
 
-    if response.status == 200 # OK
+    if floor(response.status/100) == 2 # OK
         body = JSON.parse(String(response.body))
         meta = body["meta"]
         links = body["links"]

@@ -62,6 +62,10 @@ struct Droplet
         # we assume all DO datetimes are in UTC
         data["created_at"] = Dates.DateTime(data["created_at"][1:end-1])
 
+        data["region"] = Region(data["region"])
+        data["image"] = Image(data["image"])
+        data["size"] = Size(data["size"])
+
         if "v4" in keys(data["networks"])
             networks = Array{Network, 1}(length(data["networks"]["v4"]))
             for (j, network) in enumerate(data["networks"]["v4"])
@@ -101,9 +105,9 @@ struct Droplet
             data["backup_ids"],
             data["snapshot_ids"],
             data["features"],
-            Region(data["region"]),
-            Image(data["image"]),
-            Size(data["size"]),
+            data["region"],
+            data["image"],
+            data["size"],
             data["size_slug"],
             data["networks"],
             data["kernel"],
@@ -118,135 +122,114 @@ function show(io::IO, d::Droplet)
     print(io, "Droplet ($(d.name))")
 end
 
-function get_all_droplets(manager::Manager)
-    response = get_data(manager, joinpath(ENDPOINT, "droplets?per_page=200"))
+function get_all_droplets(client::AbstractClient)
+    uri = joinpath(ENDPOINT, "droplets?per_page=200")
+    body = get_data(client, uri)
 
-    if response.status == 200 # OK
-        body = JSON.parse(String(response.body))
-        meta = body["meta"]
-        links = body["links"]
-        data = body["droplets"]
+    meta = body["meta"]
+    links = body["links"]
+    data = body["droplets"]
 
-        droplets = Array{Droplet, 1}(meta["total"])
+    droplets = Array{Droplet, 1}(meta["total"])
 
-        for (i, droplet) in enumerate(data)
-            droplets[i] = Droplet(droplet)
-        end
-    else
-        error("Received error $(response.status)")
+    for (i, droplet) in enumerate(data)
+        droplets[i] = Droplet(droplet)
     end
 
     droplets
 end
 
-function get_droplet(manager::Manager, droplet_id::Integer)
-    response = get_data(manager, joinpath(ENDPOINT, "droplets", "$(droplet_id)"))
+function get_droplet(client::AbstractClient, droplet_id::Integer)
+    uri = joinpath(ENDPOINT, "droplets", "$(droplet_id)")
+    body = get_data(client, uri)
 
-    if response.status == 200 # OK
-        body = JSON.parse(String(response.body))
-        data = body["droplet"]
-
-        droplet = Droplet(data)
-    else
-        error("Received error $(response.status)")
-    end
+    data = body["droplet"]
+    droplet = Droplet(data)
 end
 
-function get_droplet(manager::Manager, droplet::Droplet)
-    get_droplet(manager, droplet.id)
+function get_droplet(client::AbstractClient, droplet::Droplet)
+    get_droplet(client, droplet.id)
 end
 
-function get_droplets_by_tag(manager::Manager, tag::String)
-    response = get_data(manager, joinpath(ENDPOINT, "droplets?tag_name=$(tag)&per_page=200"))
+function get_droplets_by_tag(client::AbstractClient, tag::String)
+    uri = joinpath(ENDPOINT, "droplets?tag_name=$(tag)&per_page=200")
+    body = get_data(client, uri)
 
-    if response.status == 200 # OK
-        body = JSON.parse(String(response.body))
-        meta = body["meta"]
-        links = body["links"]
-        data = body["droplets"]
+    meta = body["meta"]
+    links = body["links"]
+    data = body["droplets"]
 
-        droplets = Array{Droplet, 1}(meta["total"])
+    droplets = Array{Droplet, 1}(meta["total"])
 
-        for (i, droplet) in enumerate(data)
-            droplets[i] = Droplet(droplet)
-        end
-    else
-        error("Received error $(response.status)")
+    for (i, droplet) in enumerate(data)
+        droplets[i] = Droplet(droplet)
     end
 
     droplets
 end
 
-function get_all_kernels_for_droplet(manager::Manager, droplet_id::Integer)
-    response = get_data(manager, joinpath(ENDPOINT, "droplets", "$(droplet_id)", "kernels?per_page=200"))
+function get_all_droplet_kernels(client::AbstractClient, droplet_id::Integer)
+    uri = joinpath(ENDPOINT, "droplets", "$(droplet_id)", "kernels?per_page=200")
+    body = get_data(client, uri)
 
-    if response.status == 200 # OK
-        body = JSON.parse(String(response.body))
-        meta = body["meta"]
-        links = body["links"]
-        data = body["kernels"]
+    meta = body["meta"]
+    links = body["links"]
+    data = body["kernels"]
 
-        kernels = Array{Kernel, 1}(meta["total"])
+    kernels = Array{Kernel, 1}(meta["total"])
 
-        for (i, kernel) in enumerate(data)
-            kernels[i] = Kernel(kernel)
-        end
-    else
-        error("Received error $(response.status)")
+    for (i, kernel) in enumerate(data)
+        kernels[i] = Kernel(kernel)
     end
 
     kernels
 end
 
-function get_all_kernels_for_droplet(manager::Manager, droplet::Droplet)
-    get_all_kernels_for_droplet(manager, droplet.id)
+function get_all_droplet_kernels(client::AbstractClient, droplet::Droplet)
+    get_all_droplet_kernels(client, droplet.id)
 end
 
-function create_droplet(manager::Manager; kwargs...)
-    body = Dict([String(k[1]) => k[2] for k in kwargs])
+function create_droplet(client::AbstractClient; kwargs...)
+    post_body = Dict([String(k[1]) => k[2] for k in kwargs])
 
-    if !("name" in keys(body))
+    if !("name" in keys(post_body))
         error("'name' is a required argument")
     end
 
-    if !("region" in keys(body))
+    if !("region" in keys(post_body))
         error("'region' is a required argument")
-    elseif body["region"] isa Region
-        body["region"] = body["region"].slug
+    elseif post_body["region"] isa Region
+        post_body["region"] = post_body["region"].slug
     end
 
-    if !("size" in keys(body))
+    if !("size" in keys(post_body))
         error("'size' is a required argument")
-    elseif body["size"] isa Size
-        body["size"] = body["size"].slug
+    elseif post_body["size"] isa Size
+        post_body["size"] = post_body["size"].slug
     end
 
-    if !("image" in keys(body))
+    if !("image" in keys(post_body))
         error("'image' is a required argument")
-    elseif body["image"] isa Image
-        if body["image"].slug != nothing
-            body["image"] = body["image"].slug
+    elseif post_body["image"] isa Image
+        if post_body["image"].slug.hasvalue
+            post_body["image"] = post_body["image"].slug
         else
-            body["image"] = body["image"].id
+            post_body["image"] = post_body["image"].id
         end
     end
 
-    response = post_data(manager, joinpath(ENDPOINT, "droplets"), body)
+    uri = joinpath(ENDPOINT, "droplets")
+    body = post_data(client, uri, post_body)
 
-    if response.status == 202 # OK
-        body = JSON.parse(String(response.body))
-        data = body["droplet"]
-
-        droplet = Droplet(data)
-    else
-        error("Received error $(response.status)")
-    end
+    data = body["droplet"]
+    droplet = Droplet(data)
 end
 
-function delete_droplet(manager::Manager, droplet_id::Integer)
-    delete_data(manager, joinpath(ENDPOINT, "droplets", "$(droplet_id)"))
+function delete_droplet(client::AbstractClient, droplet_id::Integer)
+    uri = joinpath(ENDPOINT, "droplets", "$(droplet_id)")
+    delete_data(client, uri)
 end
 
-function delete_droplet(manager::Manager, droplet::Droplet)
-    delete_droplet(manager, droplet.id)
+function delete_droplet(client::AbstractClient, droplet::Droplet)
+    delete_droplet(client, droplet.id)
 end

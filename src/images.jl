@@ -33,23 +33,17 @@ function show(io::IO, i::Image)
     print(io, "Image ($(i.distribution) $(i.name))")
 end
 
-function get_all_images(manager::Manager)
-    response = get_data(manager, joinpath(ENDPOINT, "images?per_page=200"))
+function get_all_images(client::AbstractClient)
+    uri = joinpath(ENDPOINT, "images?per_page=200")
+    body = get_data(client, uri)
 
-    if response.status == 200 # OK
-        body = JSON.parse(String(response.body))
-        meta = body["meta"]
-        links = body["links"]
-        data = body["images"]
+    meta = body["meta"]
+    links = body["links"]
+    data = body["images"]
 
-        images = Array{Image, 1}(meta["total"])
+    images = Array{Image, 1}(meta["total"])
 
-        for (i, image) in enumerate(data)
-            images[i] = Image(image)
-        end
-    else
-        error("Received error $(response.status)")
+    for (i, image) in enumerate(data)
+        images[i] = Image(image)
     end
-
-    images
 end

@@ -28,10 +28,10 @@ function show(io::IO, s::Size)
     print(io, "Size ($(s.slug))")
 end
 
-function get_all_sizes(manager::Manager)
-    response = get_data(manager, joinpath(ENDPOINT, "sizes?per_page=200"))
+function get_all_sizes(client::AbstractClient)
+    response = get_data(client, joinpath(ENDPOINT, "sizes?per_page=200"))
 
-    if response.status == 200 # OK
+    if floor(response.status/100) == 2 # OK
         body = JSON.parse(String(response.body))
         meta = body["meta"]
         links = body["links"]

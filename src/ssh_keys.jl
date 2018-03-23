@@ -18,10 +18,10 @@ function show(io::IO, s::SSHKey)
     print(io, "SSHKey ($(s.name))")
 end
 
-function get_all_ssh_keys(manager::Manager)
-    response = get_data(manager, joinpath(ENDPOINT, "account", "keys?per_page=200"))
+function get_all_ssh_keys(client::AbstractClient)
+    response = get_data(client, joinpath(ENDPOINT, "account", "keys?per_page=200"))
 
-    if response.status == 200 # OK
+    if floor(response.status/100) == 2 # OK
         body = JSON.parse(String(response.body))
         meta = body["meta"]
         links = body["links"]
@@ -39,10 +39,10 @@ function get_all_ssh_keys(manager::Manager)
     ssh_keys
 end
 
-function get_ssh_key(manager::Manager, key_id::Union{Integer, String})
-    response = get_data(manager, joinpath(ENDPOINT, "account", "keys", "$key_id"))
+function get_ssh_key(client::AbstractClient, key_id::Union{Integer, String})
+    response = get_data(client, joinpath(ENDPOINT, "account", "keys", "$key_id"))
 
-    if response.status == 200 # OK
+    if floor(response.status/100) == 2 # OK
         body = JSON.parse(String(response.body))
         data = body["ssh_key"]
 
@@ -52,11 +52,11 @@ function get_ssh_key(manager::Manager, key_id::Union{Integer, String})
     end
 end
 
-function get_ssh_key(manager::Manager, key::SSHKey)
-    get_ssh_key(manager, key.id)
+function get_ssh_key(client::AbstractClient, key::SSHKey)
+    get_ssh_key(client, key.id)
 end
 
-function create_ssh_key(manager::Manager; kwargs...)
+function create_ssh_key(client::AbstractClient; kwargs...)
     body = Dict([String(k[1]) => k[2] for k in kwargs])
 
     if !("name" in keys(body))
@@ -67,9 +67,9 @@ function create_ssh_key(manager::Manager; kwargs...)
         error("'public_key' is a required argument")
     end
 
-    response = post_data(manager, joinpath(ENDPOINT, "account", "keys"), body)
+    response = post_data(client, joinpath(ENDPOINT, "account", "keys"), body)
 
-    if response.status == 201 # OK
+    if floor(response.status/100) == 2 # OK
         body = JSON.parse(String(response.body))
         data = body["ssh_key"]
 
@@ -79,17 +79,17 @@ function create_ssh_key(manager::Manager; kwargs...)
     end
 end
 
-function update_ssh_key(manager::Manager, key_id::Union{Integer, String}; kwargs...)
-    #/v2/account/keys/$SSH_KEY_ID or /v2/account/keys/$SSH_KEY_FINGERPRINT
+function update_ssh_key(client::AbstractClient, key_id::Union{Integer, String}; kwargs...)
     body = Dict([String(k[1]) => k[2] for k in kwargs])
 
     if !("name" in keys(body))
         error("'name' is a required argument")
     end
 
-    response = put_data(manager, joinpath(ENDPOINT, "account", "keys", "$(key_id)"), body)
+    uri = joinpath(ENDPOINT, "account", "keys", "$(key_id)")
+    response = put_data(client, uri, body)
 
-    if response.status == 200 # OK
+    if floor(response.status/100) == 2 # OK
         body = JSON.parse(String(response.body))
         data = body["ssh_key"]
 
@@ -99,14 +99,14 @@ function update_ssh_key(manager::Manager, key_id::Union{Integer, String}; kwargs
     end
 end
 
-function update_ssh_key(manager::Manager, key::SSHKey; kwargs...)
-    update_ssh_key(manager, key.id; kwargs...)
+function update_ssh_key(client::AbstractClient, key::SSHKey; kwargs...)
+    update_ssh_key(client, key.id; kwargs...)
 end
 
-function delete_ssh_key(manager::Manager, key_id::Union{Integer, String})
-    delete_data(manager, joinpath(ENDPOINT, "account", "keys", "$(key_id)"))
+function delete_ssh_key(client::AbstractClient, key_id::Union{Integer, String})
+    delete_data(client, joinpath(ENDPOINT, "account", "keys", "$(key_id)"))
 end
 
-function delete_ssh_key(manager::Manager, key::SSHKey)
-    delete_ssh_key(manager, key.id)
+function delete_ssh_key(client::AbstractClient, key::SSHKey)
+    delete_ssh_key(client, key.id)
 end

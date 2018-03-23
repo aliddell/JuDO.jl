@@ -1,0 +1,19 @@
+{
+  "action": {
+    "id": 36804636,
+    "status": "completed",
+    "type": "create",
+    "started_at": "2014-11-14T16:29:21Z",
+    "completed_at": "2014-11-14T16:30:06Z",
+    "resource_id": 3164444,
+    "resource_type": "droplet",
+    "region": {
+      "name": "New York 3",
+      "slug": "nyc3",
+      "sizes": ["512mb", "1gb", "2gb", "4gb", "8gb", "16gb", "c-16", "32gb", "48gb", "64gb", "s-1vcpu-3gb", "c-2", "c-4", "c-8", "m-1vcpu-8gb", "m-16gb", "m-32gb", "m-64gb", "m-128gb", "m-224gb", "s-3vcpu-1gb", "s-1vcpu-2gb", "s-2vcpu-2gb", "s-2vcpu-4gb", "s-4vcpu-8gb", "s-6vcpu-16gb", "s-8vcpu-32gb", "s-12vcpu-48gb", "s-16vcpu-64gb", "s-20vcpu-96gb", "s-1vcpu-1gb", "c-32"],
+      "features": ["private_networking", "backups", "ipv6", "metadata", "install_agent", "storage"],
+      "available": true
+    },
+    "region_slug": "nyc3"
+  }
+}

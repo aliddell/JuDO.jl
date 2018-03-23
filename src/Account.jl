@@ -24,15 +24,10 @@ function show(io::IO, a::Account)
     print(io, "Account ($(a.email))")
 end
 
-function get_account(manager::Manager)
-    response = get_data(manager, joinpath(ENDPOINT, "account"))
+function get_account(client::AbstractClient)
+    uri = joinpath(ENDPOINT, "account")
+    body = get_data(client, uri)
 
-    if response.status == 200 # OK
-        body = JSON.parse(String(response.body))
-        data = body["account"]
-
-        account = Account(data)
-    else
-        error("Received error $(response.status)")
-    end
+    data = body["account"]
+    account = Account(data)
 end
