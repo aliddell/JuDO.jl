@@ -7,6 +7,21 @@ struct Snapshot
     resource_type::String
     min_disk_size::Real
     size_gigabytes::Real
+
+    function Snapshot(data::Dict{String})
+        data["created_at"] = Dates.DateTime(data["created_at"][1:end-1])
+
+        new(
+            data["id"],
+            data["name"],
+            data["created_at"],
+            data["regions"],
+            data["resource_id"],
+            data["resource_type"],
+            data["min_disk_size"],
+            data["size_gigabytes"]
+        )
+    end
 end
 
 function show(io::IO, s::Snapshot)

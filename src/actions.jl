@@ -4,7 +4,7 @@ struct Action
     action_type::String
     started_at::Dates.DateTime
     completed_at::Nullable{Dates.DateTime}
-    resource_id::Integer
+    resource_id::Nullable{Integer}
     resource_type::String
     region::Nullable{Region}
     region_slug::Nullable{String}

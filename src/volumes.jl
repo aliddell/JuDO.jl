@@ -47,7 +47,7 @@ function get_all_volumes(client::AbstractClient)
 end
 
 function create_volume(client::AbstractClient; kwargs...)
-    post_body = Dict([String(k[1]) => k[2] for k in kwargs])
+    post_body = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
 
     if !("size_gigabytes" in keys(post_body))
         error("'size_gigabytes' is a required argument")
@@ -64,8 +64,8 @@ function create_volume(client::AbstractClient; kwargs...)
     volume = Volume(data)
 end
 
-function get_volume(client::AbstractClient, volume_id::Integer)
-    uri = joinpath(ENDPOINT, "volumes", "$(volume_id)")
+function get_volume(client::AbstractClient, volume_id::String)
+    uri = joinpath(ENDPOINT, "volumes", volume_id)
     body = get_data(client, uri)
 
     data = body["volume"]
@@ -93,8 +93,8 @@ function get_volume(client::AbstractClient, name::String, region_slug::String)
     volumes
 end
 
-function get_all_volume_snapshots(client::AbstractClient, volume_id::Integer)
-    uri = joinpath(ENDPOINT, "volumes", "$(volume_id)", "snapshots?per_page=200")
+function get_all_volume_snapshots(client::AbstractClient, volume_id::String)
+    uri = joinpath(ENDPOINT, "volumes", volume_id, "snapshots?per_page=200")
     body = get_data(client, uri)
 
     meta = body["meta"]
@@ -114,22 +114,23 @@ function get_all_volume_snapshots(client::AbstractClient, volume::Volume)
     get_all_volume_snapshots(client, volume.id)
 end
 
-function create_snapshot_from_volume(client::AbstractClient, volume_id::Integer; kwargs...)
-    post_body = Dict([String(k[1]) => k[2] for k in kwargs])
+function create_snapshot_from_volume(client::AbstractClient, volume_id::String;
+                                     kwargs...)
+    post_body = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
 
     if !("name" in keys(post_body))
         error("'name' is a required argument")
     end
 
-    uri = joinpath(ENDPOINT, "volumes", "$(volume_id)", "snapshots")
+    uri = joinpath(ENDPOINT, "volumes", volume_id, "snapshots")
     body = post_data(client, uri, post_body)
 
-    data = body["volume"]
-    volume = Volume(data)
+    data = body["snapshot"]
+    snapshot = Snapshot(data)
 end
 
-function delete_volume(client::AbstractClient, volume_id::Integer)
-    uri = joinpath(ENDPOINT, "volumes", "$(volume_id)")
+function delete_volume(client::AbstractClient, volume_id::String)
+    uri = joinpath(ENDPOINT, "volumes", volume_id)
     delete_data(client, uri)
 end
 
@@ -142,8 +143,8 @@ function delete_volume(client::AbstractClient, volume_name::String, region_slug:
     delete_data(client, uri)
 end
 
-function attach_volume(client::AbstractClient, volume_id::Integer; kwargs...)
-    post_body = Dict([String(k[1]) => k[2] for k in kwargs])
+function attach_volume(client::AbstractClient, volume_id::String; kwargs...)
+    post_body = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
 
     if !("droplet_id" in keys(post_body))
         error("'droplet_id' is a required argument")
@@ -151,7 +152,7 @@ function attach_volume(client::AbstractClient, volume_id::Integer; kwargs...)
 
     post_body["type"] = "attach"
 
-    uri = joinpath(ENDPOINT, "volumes", "$(volume_id)", "actions")
+    uri = joinpath(ENDPOINT, "volumes", volume_id, "actions")
     body = post_data(client, uri, post_body)
 
     data = body["action"]
@@ -163,7 +164,7 @@ function attach_volume(client::AbstractClient, volume::Volume; kwargs...)
 end
 
 function attach_volume(client::AbstractClient; kwargs...)
-    post_body = Dict([String(k[1]) => k[2] for k in kwargs])
+    post_body = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
 
     if !("droplet_id" in keys(post_body))
         error("'droplet_id' is a required argument")
@@ -182,8 +183,8 @@ function attach_volume(client::AbstractClient; kwargs...)
     action = Action(data)
 end
 
-function remove_volume(client::AbstractClient, volume_id::Integer; kwargs...)
-    post_body = Dict([String(k[1]) => k[2] for k in kwargs])
+function remove_volume(client::AbstractClient, volume_id::String; kwargs...)
+    post_body = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
 
     if !("droplet_id" in keys(post_body))
         error("'droplet_id' is a required argument")
@@ -191,7 +192,7 @@ function remove_volume(client::AbstractClient, volume_id::Integer; kwargs...)
 
     post_body["type"] = "detach"
 
-    uri = joinpath(ENDPOINT, "volumes", "$(volume_id)", "actions")
+    uri = joinpath(ENDPOINT, "volumes", volume_id, "actions")
     body = post_data(client, uri, post_body)
 
     data = body["action"]
@@ -203,7 +204,7 @@ function remove_volume(client::AbstractClient, volume::Volume; kwargs...)
 end
 
 function remove_volume(client::AbstractClient; kwargs...)
-    post_body = Dict([String(k[1]) => k[2] for k in kwargs])
+    post_body = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
 
     if !("droplet_id" in keys(post_body))
         error("'droplet_id' is a required argument")
@@ -222,8 +223,8 @@ function remove_volume(client::AbstractClient; kwargs...)
     action = Action(data)
 end
 
-function resize_volume(client::AbstractClient, volume_id::Integer; kwargs...)
-    post_body = Dict([String(k[1]) => k[2] for k in kwargs])
+function resize_volume(client::AbstractClient, volume_id::String; kwargs...)
+    post_body = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
 
     if !("size_gigabytes" in keys(post_body))
         error("'size_gigabytes' is a required argument")
@@ -231,7 +232,7 @@ function resize_volume(client::AbstractClient, volume_id::Integer; kwargs...)
 
     post_body["type"] = "resize"
 
-    uri = joinpath(ENDPOINT, "volumes", "$(volume_id)", "actions")
+    uri = joinpath(ENDPOINT, "volumes", volume_id, "actions")
     body = post_data(client, uri, post_body)
 
     data = body["action"]
@@ -242,8 +243,8 @@ function resize_volume(client::AbstractClient, volume::Volume; kwargs...)
     resize_volume(client, volume.id; kwargs...)
 end
 
-function get_all_volume_actions(client::AbstractClient, volume_id::Integer)
-    uri = joinpath(ENDPOINT, "volumes", "$(volume_id)", "actions?per_page=200")
+function get_all_volume_actions(client::AbstractClient, volume_id::String)
+    uri = joinpath(ENDPOINT, "volumes", volume_id, "actions?per_page=200")
     body = get_data(client, uri)
 
     meta = body["meta"]
@@ -263,9 +264,9 @@ function get_all_volume_actions(client::AbstractClient, volume::Volume)
     get_all_volume_actions(client, volume.id)
 end
 
-function get_volume_action(client::AbstractClient, volume_id::Integer,
+function get_volume_action(client::AbstractClient, volume_id::String,
                            action_id::Integer)
-    uri = joinpath(ENDPOINT, "volumes", "$(volume_id)", "actions",
+    uri = joinpath(ENDPOINT, "volumes", volume_id, "actions",
                    "$(action_id)")
     body = get_data(client, uri)
 
@@ -278,7 +279,7 @@ function get_volume_action(client::AbstractClient, volume::Volume,
     get_volume_action(client, volume.id, action_id)
 end
 
-function get_volume_action(client::AbstractClient, volume_id::Integer,
+function get_volume_action(client::AbstractClient, volume_id::String,
                            action::Action)
     get_volume_action(client, volume_id, action.id)
 end

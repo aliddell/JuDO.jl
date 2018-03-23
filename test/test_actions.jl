@@ -7,7 +7,7 @@ actions = get_all_actions(test_client)
     @test actions[1].action_type == "create"
     @test actions[1].started_at == Dates.DateTime("2014-11-14T16:29:21")
     @test actions[1].completed_at.value == Dates.DateTime("2014-11-14T16:30:06")
-    @test actions[1].resource_id == 3164444
+    @test actions[1].resource_id.value == 3164444
     @test actions[1].resource_type == "droplet"
     @test actions[1].region.value.slug == "nyc3"
     @test actions[1].region_slug.value == "nyc3"
@@ -21,7 +21,7 @@ action = get_action(test_client, 36804636)
     @test action.action_type == "create"
     @test action.started_at == Dates.DateTime("2014-11-14T16:29:21")
     @test action.completed_at.value == Dates.DateTime("2014-11-14T16:30:06")
-    @test action.resource_id == 3164444
+    @test action.resource_id.value == 3164444
     @test action.resource_type == "droplet"
     @test action.region.value.slug == "nyc3"
     @test action.region_slug.value == "nyc3"

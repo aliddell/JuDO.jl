@@ -24,6 +24,5 @@ domain = create_domain(test_client; name="example.com", ip_address="1.2.3.4")
 end;
 
 @testset "Delete a Domain" begin
-    @test delete_domain(test_client, "example.com")
     @test delete_domain(test_client, domain)
 end;

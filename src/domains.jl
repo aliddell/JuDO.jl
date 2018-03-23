@@ -46,7 +46,7 @@ function get_domain(client::AbstractClient, domain::Domain)
 end
 
 function create_domain(client::AbstractClient; kwargs...)
-    post_body = Dict([String(k[1]) => k[2] for k in kwargs])
+    post_body = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
 
     if !("name" in keys(post_body))
         error("'name' is a required argument")

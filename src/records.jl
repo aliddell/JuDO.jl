@@ -71,6 +71,61 @@ function get_domain_record(client::AbstractClient, domain_name::String,
     end
 end
 
+function create_domain_record(client::AbstractClient, domain_name::String,
+                              record_type::String; kwargs...)
+    post_body = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
+
+    post_body["type"] = record_type
+
+    if record_type in ("A", "AAAA", "CAA", "CNAME", "MX", "TXT", "SRV", "NS")
+        if !(record_type in ("MX", "NS") || "name" in keys(post_body))
+            error("'name' is a required argument for type '$(record_type)'")
+        end
+
+        if !("data" in keys(post_body))
+            error("'data' is a required argument for type '$(record_type)'")
+        end
+    end
+
+    if record_type in ("SRV", "MX") && !("priority" in keys(post_body))
+        error("'priority' is a required argument for type '$(record_type)'")
+    end
+
+    if record_type == "SRV"
+        if !("port" in keys("post_body"))
+            error("'port' is a required argument for type '$(record_type)'")
+        end
+
+        if !("weight" in keys(post_body))
+            error("'weight' is a required argument for type '$(record_type)'")
+        end
+    end
+
+    if record_type == "CAA"
+        if !("flags" in keys(post_body))
+            error("'flags' is a required argument for type '$(record_type)'")
+        end
+
+        if !("tag" in keys(post_body))
+            error("'tag' is a required argument for type '$(record_type)'")
+        end
+    end
+
+    if !("ttl" in keys(post_body))
+        error("'ttl' is a required argument")
+    end
+
+    uri = joinpath(ENDPOINT, "domains", domain_name, "records")
+    body = post_data(client, uri, post_body)
+
+    data = body["domain_record"]
+    record = Record(data)
+end
+
+function create_domain_record(client::AbstractClient, domain::Domain; kwargs...)
+    create_domain_record(client, domain.name; kwargs...)
+end
+
 function get_domain_record(client::AbstractClient, domain::Domain,
                            record_id::Integer)
     get_domain_record(client, domain.name, record_id)
@@ -84,67 +139,6 @@ end
 function get_domain_record(client::AbstractClient, domain::Domain,
                            record::Record)
     get_domain_record(client, domain.name, record.id)
-end
-
-function create_domain_record(client::AbstractClient, domain_name::String,
-                              record_type::String; kwargs...)
-    body = Dict([String(k[1]) => k[2] for k in kwargs])
-
-    body["type"] = record_type
-
-    if record_type in ("A", "AAAA", "CAA", "CNAME", "MX", "TXT", "SRV", "NS")
-        if !(record_type in ("MX", "NS") || "name" in keys(body))
-            error("'name' is a required argument for type '$(record_type)'")
-        end
-
-        if !("data" in keys(body))
-            error("'data' is a required argument for type '$(record_type)'")
-        end
-    end
-
-    if record_type in ("SRV", "MX") && !("priority" in keys(body))
-        error("'priority' is a required argument for type '$(record_type)'")
-    end
-
-    if record_type == "SRV"
-        if !("port" in keys("body"))
-            error("'port' is a required argument for type '$(record_type)'")
-        end
-
-        if !("weight" in keys(body))
-            error("'weight' is a required argument for type '$(record_type)'")
-        end
-    end
-
-    if record_type == "CAA"
-        if !("flags" in keys(body))
-            error("'flags' is a required argument for type '$(record_type)'")
-        end
-
-        if !("tag" in keys(body))
-            error("'tag' is a required argument for type '$(record_type)'")
-        end
-    end
-
-    if !("ttl" in keys(body))
-        error("'ttl' is a required argument")
-    end
-
-    uri = joinpath(ENDPOINT, "domains", domain_name, "records")
-    response = post_data(client, uri, body)
-
-    if floor(response.status/100) == 2 # OK
-        body = JSON.parse(String(response.body))
-        data = body["domain_record"]
-
-        record = Record(data)
-    else
-        error("Received error $(response.status)")
-    end
-end
-
-function create_domain_record(client::AbstractClient, domain::Domain; kwargs...)
-    create_domain_record(client, domain.name; kwargs...)
 end
 
 function update_domain_record(client::AbstractClient, domain_name::String,
