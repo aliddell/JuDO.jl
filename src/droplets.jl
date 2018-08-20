@@ -43,7 +43,7 @@ struct Droplet
     vcpus::Integer
     disk::Integer
     locked::Bool
-    created_at::Dates.DateTime
+    created_at::DateTime
     status::String
     backup_ids::Array{Integer, 1}
     snapshot_ids::Array{Integer, 1}
@@ -53,14 +53,14 @@ struct Droplet
     size::Size
     size_slug::String
     networks::Dict{String, Array{Network, 1}}
-    kernel::Nullable{Kernel}
-    next_backup_window::Nullable{Dict{String, Dates.DateTime}}
+    kernel::Union{Nothing, Kernel}
+    next_backup_window::Union{Nothing, Dict{String, DateTime}}
     tags::Array{String, 1}
     volume_ids::Array{Integer, 1}
 
     function Droplet(data::Dict{String})
         # we assume all DO datetimes are in UTC
-        data["created_at"] = Dates.DateTime(data["created_at"][1:end-1])
+        data["created_at"] = DateTime(data["created_at"][1:end-1])
 
         data["region"] = Region(data["region"])
         data["image"] = Image(data["image"])
@@ -87,8 +87,8 @@ struct Droplet
 
         if data["next_backup_window"] != nothing
             # we assume all DO datetimes are in UTC
-            bst  = Dates.DateTime(data["next_backup_window"]["start"][1:end-1])
-            bend = Dates.DateTime(data["next_backup_window"]["end"][1:end-1])
+            bst  = DateTime(data["next_backup_window"]["start"][1:end-1])
+            bend = DateTime(data["next_backup_window"]["end"][1:end-1])
             data["next_backup_window"] = Dict("start" => bst,
                                               "end" => bend)
         end

@@ -1,7 +1,7 @@
 struct Snapshot
     id::String
     name::String
-    created_at::Dates.DateTime
+    created_at::DateTime
     regions::Array{String, 1}
     resource_id::String
     resource_type::String
@@ -9,7 +9,7 @@ struct Snapshot
     size_gigabytes::Real
 
     function Snapshot(data::Dict{String})
-        data["created_at"] = Dates.DateTime(data["created_at"][1:end-1])
+        data["created_at"] = DateTime(data["created_at"][1:end-1])
 
         new(
             data["id"],

@@ -3,16 +3,16 @@ struct Image
     name::String
     itype::String
     distribution::String
-    slug::Nullable{String}
+    slug::Union{Nothing, String}
     public::Bool
     regions::Array{String, 1}
     min_disk_size::Integer
     size_gigabytes::Real
-    created_at::Dates.DateTime
+    created_at::DateTime
 
     function Image(data::Dict{String})
         # we assume all DO datetimes are in UTC
-        data["created_at"] = Dates.DateTime(data["created_at"][1:end-1])
+        data["created_at"] = DateTime(data["created_at"][1:end-1])
 
         new(
             data["id"],

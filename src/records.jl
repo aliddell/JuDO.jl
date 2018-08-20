@@ -3,12 +3,12 @@ struct Record
     rtype::String
     name::String
     data::String
-    priority::Nullable{Integer}
-    port::Nullable{Integer}
+    priority::Union{Nothing, Integer}
+    port::Union{Nothing, Integer}
     ttl::Integer
-    weight::Nullable{Integer}
-    flags::Nullable{Integer}
-    tag::Nullable{String}
+    weight::Union{Nothing, Integer}
+    flags::Union{Nothing, Integer}
+    tag::Union{Nothing, String}
 
     function Record(data::Dict{String})
         new(

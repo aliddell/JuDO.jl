@@ -4,9 +4,9 @@ certificates = get_all_certificates(test_client)
     @test length(certificates) == 1
     @test certificates[1].id == "892071a0-bb95-49bc-8021-3afd67a210bf"
     @test certificates[1].name == "web-cert-01"
-    @test certificates[1].not_after == Dates.DateTime("2017-02-22T00:23:00")
+    @test certificates[1].not_after == DateTime("2017-02-22T00:23:00")
     @test certificates[1].sha1_fingerprint == "dfcc9f57d86bf58e321c2c6c31c7a971be244ac7"
-    @test certificates[1].created_at == Dates.DateTime("2017-02-08T16:02:37")
+    @test certificates[1].created_at == DateTime("2017-02-08T16:02:37")
 end;
 
 certificate = get_certificate(test_client, "892071a0-bb95-49bc-8021-3afd67a210bf")
@@ -14,9 +14,9 @@ certificate = get_certificate(test_client, "892071a0-bb95-49bc-8021-3afd67a210bf
 @testset "Retrieve an existing Certificate" begin
     @test certificate.id == "892071a0-bb95-49bc-8021-3afd67a210bf"
     @test certificate.name == "web-cert-01"
-    @test certificate.not_after == Dates.DateTime("2017-02-22T00:23:00")
+    @test certificate.not_after == DateTime("2017-02-22T00:23:00")
     @test certificate.sha1_fingerprint == "dfcc9f57d86bf58e321c2c6c31c7a971be244ac7"
-    @test certificate.created_at == Dates.DateTime("2017-02-08T16:02:37")
+    @test certificate.created_at == DateTime("2017-02-08T16:02:37")
 end;
 
 certificate = create_certificate(test_client; name="web-cert-01",
@@ -27,9 +27,9 @@ certificate = create_certificate(test_client; name="web-cert-01",
 @testset "Create a new Certificate" begin
     @test certificate.id == "892071a0-bb95-49bc-8021-3afd67a210bf"
     @test certificate.name == "web-cert-01"
-    @test certificate.not_after == Dates.DateTime("2017-02-22T00:23:01")
+    @test certificate.not_after == DateTime("2017-02-22T00:23:01")
     @test certificate.sha1_fingerprint == "dfcc9f57d86bf58e321c2c6c31c7a971be244ac7"
-    @test certificate.created_at == Dates.DateTime("2017-02-08T16:02:38")
+    @test certificate.created_at == DateTime("2017-02-08T16:02:38")
 end;
 
 @testset "Delete a Certificate" begin

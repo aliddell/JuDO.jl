@@ -1,5 +1,5 @@
 using JuDO
-using Base.Test
+using Test
 
 import JuDO: get_data, post_data, put_data, delete_data, ENDPOINT
 

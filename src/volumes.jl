@@ -5,13 +5,13 @@ struct Volume
     name::String
     description::String
     size_gigabytes::Real
-    created_at::Dates.DateTime
+    created_at::DateTime
 
     function Volume(data::Dict{String})
         data["region"] = Region(data["region"])
 
         # we assume all DO datetimes are in UTC
-        data["created_at"] = Dates.DateTime(data["created_at"][1:end-1])
+        data["created_at"] = DateTime(data["created_at"][1:end-1])
 
         new(
             data["id"],

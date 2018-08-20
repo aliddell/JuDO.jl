@@ -2,17 +2,17 @@ struct Action
     id::Integer
     status::String
     action_type::String
-    started_at::Dates.DateTime
-    completed_at::Nullable{Dates.DateTime}
-    resource_id::Nullable{Integer}
+    started_at::DateTime
+    completed_at::Union{Nothing, DateTime}
+    resource_id::Union{Nothing, Integer}
     resource_type::String
-    region::Nullable{Region}
-    region_slug::Nullable{String}
+    region::Union{Nothing, Region}
+    region_slug::Union{Nothing, String}
 
     function Action(data::Dict{String})
-        data["started_at"] = Dates.DateTime(data["started_at"][1:end-1])
+        data["started_at"] = DateTime(data["started_at"][1:end-1])
         if data["completed_at"] != nothing
-            data["completed_at"] = Dates.DateTime(data["completed_at"][1:end-1])
+            data["completed_at"] = DateTime(data["completed_at"][1:end-1])
         end
         if data["region"] != nothing
             data["region"] = Region(data["region"])

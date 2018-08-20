@@ -6,7 +6,7 @@ mutable struct Client <: AbstractClient
     token::String
     ratelimit_limit::Integer
     ratelimit_remaining::Integer
-    ratelimit_reset::Dates.DateTime
+    ratelimit_reset::DateTime
 
     function Client(token::String)
         new(token, -1, -1, now())
@@ -21,7 +21,7 @@ function handle_response(client::Client, response::HTTP.Response)
     headers = Dict(response.headers)
     client.ratelimit_limit = parse(headers["Ratelimit-Limit"])
     client.ratelimit_remaining = parse(headers["Ratelimit-Remaining"])
-    client.ratelimit_reset = Dates.unix2datetime(parse(headers["Ratelimit-Reset"]))
+    client.ratelimit_reset = unix2datetime(parse(headers["Ratelimit-Reset"]))
 
     if floor(response.status/100) == 2
         JSON.parse(String(response.body))

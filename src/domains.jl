@@ -1,7 +1,7 @@
 struct Domain
     name::String
     ttl::Integer
-    zone_file::Nullable{String}
+    zone_file::Union{Nothing, String}
 
     function Domain(data::Dict{String})
         new(
