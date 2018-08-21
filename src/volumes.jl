@@ -5,13 +5,13 @@ struct Volume
     name::String
     description::String
     size_gigabytes::Real
-    created_at::Dates.DateTime
+    created_at::DateTime
 
     function Volume(data::Dict{String})
         data["region"] = Region(data["region"])
 
         # we assume all DO datetimes are in UTC
-        data["created_at"] = Dates.DateTime(data["created_at"][1:end-1])
+        data["created_at"] = DateTime(data["created_at"][1:end-1])
 
         new(
             data["id"],
@@ -37,7 +37,7 @@ function get_all_volumes(client::AbstractClient)
     links = body["links"]
     data = body["volumes"]
 
-    volumes = Array{Volume, 1}(meta["total"])
+    volumes = Array{Volume, 1}(UndefInitializer(), meta["total"])
 
     for (i, volume) in enumerate(data)
         volumes[i] = Volume(volume)
@@ -84,7 +84,7 @@ function get_volume(client::AbstractClient, name::String, region_slug::String)
     links = body["links"]
 
     data = body["volumes"]
-    volumes = Array{Volume, 1}(meta["total"])
+    volumes = Array{Volume, 1}(UndefInitializer(), meta["total"])
 
     for (i, volume) in enumerate(data)
         volumes[i] = Volume(volume)
@@ -101,7 +101,7 @@ function get_all_volume_snapshots(client::AbstractClient, volume_id::String)
     links = body["links"]
 
     data = body["snapshots"]
-    snapshots = Array{Snapshot, 1}(meta["total"])
+    snapshots = Array{Snapshot, 1}(UndefInitializer(), meta["total"])
 
     for (i, snapshot) in enumerate(data)
         snapshots[i] = Snapshot(snapshot)
@@ -251,7 +251,7 @@ function get_all_volume_actions(client::AbstractClient, volume_id::String)
     links = body["links"]
 
     data = body["actions"]
-    actions = Array{Action, 1}(meta["total"])
+    actions = Array{Action, 1}(UndefInitializer(), meta["total"])
 
     for (i, action) in enumerate(data)
         actions[i] = Action(action)

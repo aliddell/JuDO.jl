@@ -1,7 +1,9 @@
 using JuDO
-using Base.Test
+using Test
 
+import Dates: DateTime
 import JuDO: get_data, post_data, put_data, delete_data, ENDPOINT
+import JSON: parse
 
 DATA_DIR = joinpath(dirname(abspath(@__FILE__)), "data")
 
@@ -10,24 +12,30 @@ struct TestClient <: AbstractClient
 end
 
 function get_data(client::TestClient, uri::String)
-    uri = replace(replace(uri, ENDPOINT, ""), "?per_page=200", "")
+    uri = replace(replace(uri, ENDPOINT => ""), "?per_page=200" => "")
     path = joinpath(DATA_DIR, uri, "get.json")
-    JSON.parse(readstring(path))
+    open(path, "r") do io
+        parse(read(io, String))
+    end
 end
 
 function post_data(client::TestClient, uri::String, body::Dict{String})
     if endswith(uri, "actions")
-        path = joinpath(DATA_DIR, replace(uri, ENDPOINT, ""),
+        path = joinpath(DATA_DIR, replace(uri, ENDPOINT => ""),
                         "$(body["type"]).json")
     else
-        path = joinpath(DATA_DIR, replace(uri, ENDPOINT, ""), "post.json")
+        path = joinpath(DATA_DIR, replace(uri, ENDPOINT => ""), "post.json")
     end
-    JSON.parse(readstring(path))
+    open(path, "r") do io
+        parse(read(io, String))
+    end
 end
 
 function put_data(client::TestClient, uri::String, body::Dict{String})
     path = joinpath(DATA_DIR, uri, "put.json")
-    JSON.parse(readstring(path))
+    open(path, "r") do io
+        parse(read(io, String))
+    end
 end
 
 function delete_data(client::TestClient, uri::String)

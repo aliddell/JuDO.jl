@@ -9,7 +9,7 @@ volumes = get_all_volumes(test_client)
     @test volumes[2].name == "another-example"
     @test volumes[2].description == "A bigger example volume"
     @test volumes[2].size_gigabytes == 500
-    @test volumes[2].created_at == Dates.DateTime("2016-03-05T17:00:49")
+    @test volumes[2].created_at == DateTime("2016-03-05T17:00:49")
 end;
 
 volume = create_volume(test_client; size_gigabytes=10, name="example",
@@ -24,7 +24,7 @@ volume = create_volume(test_client; size_gigabytes=10, name="example",
     @test volume.name == "example"
     @test volume.description == "Block store for examples"
     @test volume.size_gigabytes == 10
-    @test volume.created_at == Dates.DateTime("2016-03-02T17:00:49")
+    @test volume.created_at == DateTime("2016-03-02T17:00:49")
 end;
 
 volume = get_volume(test_client, volume)
@@ -37,7 +37,7 @@ volume = get_volume(test_client, volume)
     @test volume.name == "example"
     @test volume.description == "Block store for examples"
     @test volume.size_gigabytes == 10
-    @test volume.created_at == Dates.DateTime("2016-03-02T17:00:49")
+    @test volume.created_at == DateTime("2016-03-02T17:00:49")
 end;
 
 volume_id = "82a48a18-873f-11e6-96bf-000f53315a41"
@@ -48,7 +48,7 @@ snapshots = get_all_volume_snapshots(test_client, volume_id)
     @test snapshots[1].id == "8eb4d51a-873f-11e6-96bf-000f53315a41"
     @test snapshots[1].name == "big-data-snapshot1475261752"
     @test snapshots[1].regions[1] == "nyc1"
-    @test snapshots[1].created_at == Dates.DateTime("2016-09-30T18:56:12")
+    @test snapshots[1].created_at == DateTime("2016-09-30T18:56:12")
     @test snapshots[1].resource_id == "82a48a18-873f-11e6-96bf-000f53315a41"
     @test snapshots[1].resource_type == "volume"
     @test snapshots[1].min_disk_size == 10
@@ -62,7 +62,7 @@ snapshot = create_snapshot_from_volume(test_client, volume_id;
     @test snapshot.id == "8fa70202-873f-11e6-8b68-000f533176b1"
     @test snapshot.name == "big-data-snapshot1475261774"
     @test snapshot.regions[1] == "nyc1"
-    @test snapshot.created_at == Dates.DateTime("2016-09-30T18:56:14")
+    @test snapshot.created_at == DateTime("2016-09-30T18:56:14")
     @test snapshot.resource_id == "82a48a18-873f-11e6-96bf-000f53315a41"
     @test snapshot.resource_type == "volume"
     @test snapshot.min_disk_size == 10
@@ -80,9 +80,9 @@ action = attach_volume(test_client, "7724db7c-e098-11e5-b522-000f53304e51";
     @test action.id == 72531856
     @test action.status == "completed"
     @test action.action_type == "attach_volume"
-    @test action.started_at == Dates.DateTime("2015-11-12T17:51:03")
-    @test action.completed_at.value == Dates.DateTime("2015-11-12T17:51:14")
-    @test !action.resource_id.hasvalue
+    @test action.started_at == DateTime("2015-11-12T17:51:03")
+    @test action.completed_at == DateTime("2015-11-12T17:51:14")
+    @test action.resource_id == nothing
     @test action.resource_type == "volume"
 end;
 
@@ -93,9 +93,9 @@ action = remove_volume(test_client, "7724db7c-e098-11e5-b522-000f53304e51";
     @test action.id == 68212773
     @test action.status == "in-progress"
     @test action.action_type == "detach_volume"
-    @test action.started_at == Dates.DateTime("2015-10-15T17:46:15")
-    @test !action.completed_at.hasvalue
-    @test !action.resource_id.hasvalue
+    @test action.started_at == DateTime("2015-10-15T17:46:15")
+    @test action.completed_at == nothing
+    @test action.resource_id == nothing
     @test action.resource_type == "backend"
 end;
 
@@ -106,9 +106,9 @@ action = resize_volume(test_client, "7724db7c-e098-11e5-b522-000f53304e51";
     @test action.id == 72531856
     @test action.status == "in-progress"
     @test action.action_type == "resize"
-    @test action.started_at == Dates.DateTime("2015-11-12T17:51:03")
-    @test action.completed_at.value == Dates.DateTime("2015-11-12T17:51:14")
-    @test !action.resource_id.hasvalue
+    @test action.started_at == DateTime("2015-11-12T17:51:03")
+    @test action.completed_at == DateTime("2015-11-12T17:51:14")
+    @test action.resource_id == nothing
     @test action.resource_type == "volume"
 end;
 
@@ -119,9 +119,9 @@ actions = get_all_volume_actions(test_client, "7724db7c-e098-11e5-b522-000f53304
     @test actions[1].id == 72531856
     @test actions[1].status == "completed"
     @test actions[1].action_type == "attach_volume"
-    @test actions[1].started_at == Dates.DateTime("2015-11-21T21:51:09")
-    @test actions[1].completed_at.value == Dates.DateTime("2015-11-21T21:51:09")
-    @test !actions[1].resource_id.hasvalue
+    @test actions[1].started_at == DateTime("2015-11-21T21:51:09")
+    @test actions[1].completed_at == DateTime("2015-11-21T21:51:09")
+    @test actions[1].resource_id == nothing
     @test actions[1].resource_type == "volume"
 end;
 
@@ -132,8 +132,8 @@ action = get_volume_action(test_client, "7724db7c-e098-11e5-b522-000f53304e51",
     @test action.id == 72531856
     @test action.status == "completed"
     @test action.action_type == "attach_volume"
-    @test action.started_at == Dates.DateTime("2015-11-12T17:51:03")
-    @test action.completed_at.value == Dates.DateTime("2015-11-12T17:51:14")
-    @test !action.resource_id.hasvalue
+    @test action.started_at == DateTime("2015-11-12T17:51:03")
+    @test action.completed_at == DateTime("2015-11-12T17:51:14")
+    @test action.resource_id == nothing
     @test action.resource_type == "volume"
 end;

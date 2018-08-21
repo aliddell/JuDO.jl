@@ -43,7 +43,7 @@ struct Droplet
     vcpus::Integer
     disk::Integer
     locked::Bool
-    created_at::Dates.DateTime
+    created_at::DateTime
     status::String
     backup_ids::Array{Integer, 1}
     snapshot_ids::Array{Integer, 1}
@@ -53,28 +53,28 @@ struct Droplet
     size::Size
     size_slug::String
     networks::Dict{String, Array{Network, 1}}
-    kernel::Nullable{Kernel}
-    next_backup_window::Nullable{Dict{String, Dates.DateTime}}
+    kernel::Union{Nothing, Kernel}
+    next_backup_window::Union{Nothing, Dict{String, DateTime}}
     tags::Array{String, 1}
     volume_ids::Array{Integer, 1}
 
     function Droplet(data::Dict{String})
         # we assume all DO datetimes are in UTC
-        data["created_at"] = Dates.DateTime(data["created_at"][1:end-1])
+        data["created_at"] = DateTime(data["created_at"][1:end-1])
 
         data["region"] = Region(data["region"])
         data["image"] = Image(data["image"])
         data["size"] = Size(data["size"])
 
         if "v4" in keys(data["networks"])
-            networks = Array{Network, 1}(length(data["networks"]["v4"]))
+            networks = Array{Network, 1}(UndefInitializer(), length(data["networks"]["v4"]))
             for (j, network) in enumerate(data["networks"]["v4"])
                 networks[j] = Network(network)
             end
             data["networks"]["v4"] = networks
         end
         if "v6" in keys(data["networks"])
-            networks = Array{Network, 1}(length(data["networks"]["v6"]))
+            networks = Array{Network, 1}(UndefInitializer(), length(data["networks"]["v6"]))
             for (j, network) in enumerate(data["networks"]["v6"])
                 networks[j] = Network(network)
             end
@@ -87,8 +87,8 @@ struct Droplet
 
         if data["next_backup_window"] != nothing
             # we assume all DO datetimes are in UTC
-            bst  = Dates.DateTime(data["next_backup_window"]["start"][1:end-1])
-            bend = Dates.DateTime(data["next_backup_window"]["end"][1:end-1])
+            bst  = DateTime(data["next_backup_window"]["start"][1:end-1])
+            bend = DateTime(data["next_backup_window"]["end"][1:end-1])
             data["next_backup_window"] = Dict("start" => bst,
                                               "end" => bend)
         end
@@ -130,7 +130,7 @@ function get_all_droplets(client::AbstractClient)
     links = body["links"]
     data = body["droplets"]
 
-    droplets = Array{Droplet, 1}(meta["total"])
+    droplets = Array{Droplet, 1}(UndefInitializer(), meta["total"])
 
     for (i, droplet) in enumerate(data)
         droplets[i] = Droplet(droplet)
@@ -159,7 +159,7 @@ function get_droplets_by_tag(client::AbstractClient, tag::String)
     links = body["links"]
     data = body["droplets"]
 
-    droplets = Array{Droplet, 1}(meta["total"])
+    droplets = Array{Droplet, 1}(UndefInitializer(), meta["total"])
 
     for (i, droplet) in enumerate(data)
         droplets[i] = Droplet(droplet)
@@ -176,7 +176,7 @@ function get_all_droplet_kernels(client::AbstractClient, droplet_id::Integer)
     links = body["links"]
     data = body["kernels"]
 
-    kernels = Array{Kernel, 1}(meta["total"])
+    kernels = Array{Kernel, 1}(UndefInitializer(), meta["total"])
 
     for (i, kernel) in enumerate(data)
         kernels[i] = Kernel(kernel)

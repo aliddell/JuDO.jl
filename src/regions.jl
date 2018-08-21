@@ -24,12 +24,12 @@ function get_all_regions(client::AbstractClient)
     response = get_data(client, joinpath(ENDPOINT, "regions?per_page=200"))
 
     if floor(response.status/100) == 2 # OK
-        body = JSON.parse(String(response.body))
+        body = parse(String(response.body))
         meta = body["meta"]
         links = body["links"]
         data = body["regions"]
 
-        regions = Array{Region, 1}(meta["total"])
+        regions = Array{Region, 1}(UndefInitializer(), meta["total"])
 
         for (i, region) in enumerate(data)
             regions[i] = Region(region)

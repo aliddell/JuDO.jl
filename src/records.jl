@@ -3,12 +3,12 @@ struct Record
     rtype::String
     name::String
     data::String
-    priority::Nullable{Integer}
-    port::Nullable{Integer}
+    priority::Union{Nothing, Integer}
+    port::Union{Nothing, Integer}
     ttl::Integer
-    weight::Nullable{Integer}
-    flags::Nullable{Integer}
-    tag::Nullable{String}
+    weight::Union{Nothing, Integer}
+    flags::Union{Nothing, Integer}
+    tag::Union{Nothing, String}
 
     function Record(data::Dict{String})
         new(
@@ -35,12 +35,12 @@ function get_all_domain_records(client::AbstractClient, domain_name::String)
     response = get_data(client, uri)
 
     if floor(response.status/100) == 2 # OK
-        body = JSON.parse(String(response.body))
+        body = parse(String(response.body))
         meta = body["meta"]
         links = body["links"]
         data = body["domain_records"]
 
-        records = Array{Record, 1}(meta["total"])
+        records = Array{Record, 1}(UndefInitializer(), meta["total"])
 
         for (i, record) in enumerate(data)
             records[i] = Record(record)
@@ -62,7 +62,7 @@ function get_domain_record(client::AbstractClient, domain_name::String,
                         "records", "$record_id"))
 
     if floor(response.status/100) == 2 # OK
-        body = JSON.parse(String(response.body))
+        body = parse(String(response.body))
         data = body["domain_record"]
 
         record = Record(data)
@@ -149,7 +149,7 @@ function update_domain_record(client::AbstractClient, domain_name::String,
     response = put_data(client, uri, body)
 
     if floor(response.status/100) == 2 # OK
-        body = JSON.parse(String(response.body))
+        body = parse(String(response.body))
         data = body["domain_record"]
 
         record = Record(data)

@@ -1,13 +1,13 @@
 struct Certificate
     id::String
     name::String
-    not_after::Dates.DateTime
+    not_after::DateTime
     sha1_fingerprint::String
-    created_at::Dates.DateTime
+    created_at::DateTime
 
     function Certificate(data::Dict{String})
-        data["not_after"] = Dates.DateTime(data["not_after"][1:end-1])
-        data["created_at"] = Dates.DateTime(data["created_at"][1:end-1])
+        data["not_after"] = DateTime(data["not_after"][1:end-1])
+        data["created_at"] = DateTime(data["created_at"][1:end-1])
 
         new(
             data["id"],
@@ -31,7 +31,7 @@ function get_all_certificates(client::AbstractClient)
     links = body["links"]
     data = body["certificates"]
 
-    certificates = Array{Certificate, 1}(meta["total"])
+    certificates = Array{Certificate, 1}(UndefInitializer(), meta["total"])
 
     for (i, certificate) in enumerate(data)
         certificates[i] = Certificate(certificate)

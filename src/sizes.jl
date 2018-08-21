@@ -32,12 +32,12 @@ function get_all_sizes(client::AbstractClient)
     response = get_data(client, joinpath(ENDPOINT, "sizes?per_page=200"))
 
     if floor(response.status/100) == 2 # OK
-        body = JSON.parse(String(response.body))
+        body = parse(String(response.body))
         meta = body["meta"]
         links = body["links"]
         data = body["sizes"]
 
-        sizes = Array{Size, 1}(meta["total"])
+        sizes = Array{Size, 1}(UndefInitializer(), meta["total"])
 
         for (i, dsize) in enumerate(data)
             sizes[i] = Size(dsize)
