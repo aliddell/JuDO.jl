@@ -44,7 +44,7 @@ function get_all_actions(client::AbstractClient)
     links = body["links"]
     data = body["actions"]
 
-    actions = Array{Action, 1}(meta["total"])
+    actions = Array{Action, 1}(UndefInitializer(), meta["total"])
 
     for (i, action) in enumerate(data)
         actions[i] = Action(action)

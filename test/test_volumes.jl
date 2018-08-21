@@ -81,8 +81,8 @@ action = attach_volume(test_client, "7724db7c-e098-11e5-b522-000f53304e51";
     @test action.status == "completed"
     @test action.action_type == "attach_volume"
     @test action.started_at == DateTime("2015-11-12T17:51:03")
-    @test action.completed_at.value == DateTime("2015-11-12T17:51:14")
-    @test !action.resource_id.hasvalue
+    @test action.completed_at == DateTime("2015-11-12T17:51:14")
+    @test action.resource_id == nothing
     @test action.resource_type == "volume"
 end;
 
@@ -94,8 +94,8 @@ action = remove_volume(test_client, "7724db7c-e098-11e5-b522-000f53304e51";
     @test action.status == "in-progress"
     @test action.action_type == "detach_volume"
     @test action.started_at == DateTime("2015-10-15T17:46:15")
-    @test !action.completed_at.hasvalue
-    @test !action.resource_id.hasvalue
+    @test action.completed_at == nothing
+    @test action.resource_id == nothing
     @test action.resource_type == "backend"
 end;
 
@@ -107,8 +107,8 @@ action = resize_volume(test_client, "7724db7c-e098-11e5-b522-000f53304e51";
     @test action.status == "in-progress"
     @test action.action_type == "resize"
     @test action.started_at == DateTime("2015-11-12T17:51:03")
-    @test action.completed_at.value == DateTime("2015-11-12T17:51:14")
-    @test !action.resource_id.hasvalue
+    @test action.completed_at == DateTime("2015-11-12T17:51:14")
+    @test action.resource_id == nothing
     @test action.resource_type == "volume"
 end;
 
@@ -120,8 +120,8 @@ actions = get_all_volume_actions(test_client, "7724db7c-e098-11e5-b522-000f53304
     @test actions[1].status == "completed"
     @test actions[1].action_type == "attach_volume"
     @test actions[1].started_at == DateTime("2015-11-21T21:51:09")
-    @test actions[1].completed_at.value == DateTime("2015-11-21T21:51:09")
-    @test !actions[1].resource_id.hasvalue
+    @test actions[1].completed_at == DateTime("2015-11-21T21:51:09")
+    @test actions[1].resource_id == nothing
     @test actions[1].resource_type == "volume"
 end;
 
@@ -133,7 +133,7 @@ action = get_volume_action(test_client, "7724db7c-e098-11e5-b522-000f53304e51",
     @test action.status == "completed"
     @test action.action_type == "attach_volume"
     @test action.started_at == DateTime("2015-11-12T17:51:03")
-    @test action.completed_at.value == DateTime("2015-11-12T17:51:14")
-    @test !action.resource_id.hasvalue
+    @test action.completed_at == DateTime("2015-11-12T17:51:14")
+    @test action.resource_id == nothing
     @test action.resource_type == "volume"
 end;

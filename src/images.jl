@@ -41,7 +41,7 @@ function get_all_images(client::AbstractClient)
     links = body["links"]
     data = body["images"]
 
-    images = Array{Image, 1}(meta["total"])
+    images = Array{Image, 1}(UndefInitializer(), meta["total"])
 
     for (i, image) in enumerate(data)
         images[i] = Image(image)

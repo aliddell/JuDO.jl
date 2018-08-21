@@ -3,7 +3,7 @@ module JuDO
 import Base: show
 import Dates: DateTime, unix2datetime
 import HTTP
-import JSON
+import JSON: parse, json
 
 export AbstractClient, Client
 

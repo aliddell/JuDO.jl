@@ -24,7 +24,7 @@ function get_all_domains(client::AbstractClient)
     links = body["links"]
 
     data = body["domains"]
-    domains = Array{Domain, 1}(meta["total"])
+    domains = Array{Domain, 1}(UndefInitializer(), meta["total"])
 
     for (i, domain) in enumerate(data)
         domains[i] = Domain(domain)

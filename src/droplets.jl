@@ -67,14 +67,14 @@ struct Droplet
         data["size"] = Size(data["size"])
 
         if "v4" in keys(data["networks"])
-            networks = Array{Network, 1}(length(data["networks"]["v4"]))
+            networks = Array{Network, 1}(UndefInitializer(), length(data["networks"]["v4"]))
             for (j, network) in enumerate(data["networks"]["v4"])
                 networks[j] = Network(network)
             end
             data["networks"]["v4"] = networks
         end
         if "v6" in keys(data["networks"])
-            networks = Array{Network, 1}(length(data["networks"]["v6"]))
+            networks = Array{Network, 1}(UndefInitializer(), length(data["networks"]["v6"]))
             for (j, network) in enumerate(data["networks"]["v6"])
                 networks[j] = Network(network)
             end
@@ -130,7 +130,7 @@ function get_all_droplets(client::AbstractClient)
     links = body["links"]
     data = body["droplets"]
 
-    droplets = Array{Droplet, 1}(meta["total"])
+    droplets = Array{Droplet, 1}(UndefInitializer(), meta["total"])
 
     for (i, droplet) in enumerate(data)
         droplets[i] = Droplet(droplet)
@@ -159,7 +159,7 @@ function get_droplets_by_tag(client::AbstractClient, tag::String)
     links = body["links"]
     data = body["droplets"]
 
-    droplets = Array{Droplet, 1}(meta["total"])
+    droplets = Array{Droplet, 1}(UndefInitializer(), meta["total"])
 
     for (i, droplet) in enumerate(data)
         droplets[i] = Droplet(droplet)
@@ -176,7 +176,7 @@ function get_all_droplet_kernels(client::AbstractClient, droplet_id::Integer)
     links = body["links"]
     data = body["kernels"]
 
-    kernels = Array{Kernel, 1}(meta["total"])
+    kernels = Array{Kernel, 1}(UndefInitializer(), meta["total"])
 
     for (i, kernel) in enumerate(data)
         kernels[i] = Kernel(kernel)

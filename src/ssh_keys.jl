@@ -22,12 +22,12 @@ function get_all_ssh_keys(client::AbstractClient)
     response = get_data(client, joinpath(ENDPOINT, "account", "keys?per_page=200"))
 
     if floor(response.status/100) == 2 # OK
-        body = JSON.parse(String(response.body))
+        body = parse(String(response.body))
         meta = body["meta"]
         links = body["links"]
         data = body["ssh_keys"]
 
-        ssh_keys = Array{SSHKey, 1}(meta["total"])
+        ssh_keys = Array{SSHKey, 1}(UndefInitializer(), meta["total"])
 
         for (i, ssh_key) in enumerate(data)
             ssh_keys[i] = SSHKey(ssh_key)
@@ -43,7 +43,7 @@ function get_ssh_key(client::AbstractClient, key_id::Union{Integer, String})
     response = get_data(client, joinpath(ENDPOINT, "account", "keys", "$key_id"))
 
     if floor(response.status/100) == 2 # OK
-        body = JSON.parse(String(response.body))
+        body = parse(String(response.body))
         data = body["ssh_key"]
 
         ssh_key = SSHKey(data)
@@ -70,7 +70,7 @@ function create_ssh_key(client::AbstractClient; kwargs...)
     response = post_data(client, joinpath(ENDPOINT, "account", "keys"), body)
 
     if floor(response.status/100) == 2 # OK
-        body = JSON.parse(String(response.body))
+        body = parse(String(response.body))
         data = body["ssh_key"]
 
         ssh_key = SSHKey(data)
@@ -90,7 +90,7 @@ function update_ssh_key(client::AbstractClient, key_id::Union{Integer, String}; 
     response = put_data(client, uri, body)
 
     if floor(response.status/100) == 2 # OK
-        body = JSON.parse(String(response.body))
+        body = parse(String(response.body))
         data = body["ssh_key"]
 
         ssh_key = SSHKey(data)

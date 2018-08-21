@@ -24,7 +24,7 @@ function handle_response(client::Client, response::HTTP.Response)
     client.ratelimit_reset = unix2datetime(parse(headers["Ratelimit-Reset"]))
 
     if floor(response.status/100) == 2
-        JSON.parse(String(response.body))
+        parse(String(response.body))
     else
         error("Received error $(response.status)")
     end
@@ -47,7 +47,7 @@ end
 function post_data(client::Client, uri::String, body::Dict{String})
     headers = Dict("Content-Type" => "application/json",
                    "Authorization" => "Bearer $(client.token)")
-    body = JSON.json(body)
+    body = json(body)
     response = 0
 
     try
@@ -62,7 +62,7 @@ end
 function put_data(client::Client, uri::String, body::Dict{String})
     headers = Dict("Content-Type" => "application/json",
                    "Authorization" => "Bearer $(client.token)")
-    body = JSON.json(body)
+    body = json(body)
     response = 0
 
     try

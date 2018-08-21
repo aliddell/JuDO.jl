@@ -31,7 +31,7 @@ function get_all_certificates(client::AbstractClient)
     links = body["links"]
     data = body["certificates"]
 
-    certificates = Array{Certificate, 1}(meta["total"])
+    certificates = Array{Certificate, 1}(UndefInitializer(), meta["total"])
 
     for (i, certificate) in enumerate(data)
         certificates[i] = Certificate(certificate)
