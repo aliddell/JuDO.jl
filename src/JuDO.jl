@@ -1,7 +1,7 @@
 module JuDO
 
 import Base: show
-import Dates: DateTime, unix2datetime
+import Dates: DateTime, unix2datetime, now
 import HTTP
 import JSON: parse, json
 
