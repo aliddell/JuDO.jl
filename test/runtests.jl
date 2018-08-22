@@ -43,6 +43,13 @@ function delete_data(client::TestClient, uri::String)
 end
 
 test_client = TestClient("fake token")
+test_client_pass = TestClient("fake token")
+test_client_fail = TestClient("false token")
+
+@testset "Client Equality" begin
+    @test test_client == test_client_pass
+    @test test_client != test_client_fail
+end;
 
 # account tests
 include("test_account.jl")
