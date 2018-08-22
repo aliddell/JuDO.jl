@@ -17,6 +17,16 @@ function show(io::IO, c::Client)
     print(io, "Client ($(c.token[1:8]))")
 end
 
+function ==(a::Client, b::Client)
+    for fn in fieldnames(Client)
+        if getproperty(a, fn) != getproperty(b, fn)
+            return false
+        end
+    end
+
+    return true
+end
+
 function handle_response(client::Client, response::HTTP.Response)
     headers = Dict(response.headers)
     client.ratelimit_limit = parse(headers["Ratelimit-Limit"])
