@@ -20,6 +20,10 @@ struct Account
     end
 end
 
+function show(io::IO, a::Account)
+    print(io, "Account ($(a.email))")
+end
+
 function ==(a::Account, b::Account)
     for fn in fieldnames(Account)
         if getproperty(a, fn) != getproperty(b, fn)
@@ -28,10 +32,6 @@ function ==(a::Account, b::Account)
     end
 
     return true
-end
-
-function show(io::IO, a::Account)
-    print(io, "Account ($(a.email))")
 end
 
 function get_account(client::AbstractClient)

@@ -1,5 +1,10 @@
 account = get_account(test_client)
 
+@testset "Account Equality" begin
+    account2 = get_account(test_client)
+    @test account == account2
+end
+
 @testset "Get User Information" begin
     @test account.email == "sammy@digitalocean.com"
     @test account.droplet_limit == 25
