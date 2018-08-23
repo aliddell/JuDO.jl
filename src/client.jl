@@ -1,4 +1,5 @@
 ENDPOINT = "https://api.digitalocean.com/v2/"
+MAXOBJECTS = 200 # maximum number of objects one can request
 
 abstract type AbstractClient end
 

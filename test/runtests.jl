@@ -2,7 +2,7 @@ using JuDO
 using Test
 
 import Dates: DateTime
-import JuDO: get_data, post_data, put_data, delete_data, ENDPOINT
+import JuDO: get_data, post_data, put_data, delete_data, ENDPOINT, MAXOBJECTS
 import JSON: parse
 
 DATA_DIR = joinpath(dirname(abspath(@__FILE__)), "data")
@@ -12,11 +12,24 @@ struct TestClient <: AbstractClient
 end
 
 function get_data(client::TestClient, uri::String)
-    uri = replace(replace(uri, ENDPOINT => ""), "?per_page=200" => "")
+    uri = replace(uri, ENDPOINT => "")
+    # strip off query string
+    idx = findfirst(isequal('?'), uri)
+    if idx != nothing
+        uri = uri[1:idx-1]
+    end
+
     path = joinpath(DATA_DIR, uri, "get.json")
-    open(path, "r") do io
+    data = open(path, "r") do io
         parse(read(io, String))
     end
+
+    # remove "next" to prevent infinite loops
+    if haskey(data, "links") && haskey(data["links"], "pages")
+        delete!(data["links"]["pages"], "next")
+    end
+
+    data
 end
 
 function post_data(client::TestClient, uri::String, body::Dict{String})
@@ -60,6 +73,6 @@ include("test_domains.jl")
 include("test_volumes.jl")
 
 # real client test
-if "dotok" in keys(ENV)
+if haskey(ENV, "dotok")
     client = Client(ENV["dotok"])
 end

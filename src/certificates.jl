@@ -55,15 +55,15 @@ end
 function create_certificate(client::AbstractClient; kwargs...)
     post_body = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
 
-    if !("name" in keys(post_body))
+    if !haskey(post_body, "name")
         error("'name' is a required argument")
     end
 
-    if !("private_key" in keys(post_body))
+    if !haskey(post_body, "private_key")
         error("'private_key' is a required argument")
     end
 
-    if !("leaf_certificate" in keys(post_body))
+    if !haskey(post_body, "leaf_certificate")
         error("'leaf_certificate' is a required argument")
     end
 

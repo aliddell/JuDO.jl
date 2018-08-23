@@ -59,11 +59,11 @@ end
 function create_ssh_key(client::AbstractClient; kwargs...)
     body = Dict([String(k[1]) => k[2] for k in kwargs])
 
-    if !("name" in keys(body))
+    if !haskey(body, "name")
         error("'name' is a required argument")
     end
 
-    if !("public_key" in keys(body))
+    if !haskey(body, "public_key")
         error("'public_key' is a required argument")
     end
 
@@ -82,7 +82,7 @@ end
 function update_ssh_key(client::AbstractClient, key_id::Union{Integer, String}; kwargs...)
     body = Dict([String(k[1]) => k[2] for k in kwargs])
 
-    if !("name" in keys(body))
+    if !haskey(body, "name")
         error("'name' is a required argument")
     end
 

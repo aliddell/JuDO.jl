@@ -48,11 +48,11 @@ end
 function create_domain(client::AbstractClient; kwargs...)
     post_body = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
 
-    if !("name" in keys(post_body))
+    if !haskey(post_body, "name")
         error("'name' is a required argument")
     end
 
-    if !("ip_address" in keys(post_body))
+    if !haskey(post_body, "ip_address")
         error("'ip_address' is a required argument")
     end
 

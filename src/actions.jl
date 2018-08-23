@@ -37,17 +37,34 @@ function show(io::IO, a::Action)
 end
 
 function get_all_actions(client::AbstractClient)
-    uri = joinpath(ENDPOINT, "actions?per_page=200")
+    uri = joinpath(ENDPOINT, "actions?per_page=$MAXOBJECTS")
     body = get_data(client, uri)
 
     meta = body["meta"]
     links = body["links"]
     data = body["actions"]
 
-    actions = Array{Action, 1}(UndefInitializer(), meta["total"])
+    total_actions = meta["total"]
+    actions = Array{Action, 1}(UndefInitializer(), total_actions)
 
     for (i, action) in enumerate(data)
         actions[i] = Action(action)
+    end
+
+    # get the rest of the actions in as few requests as possible
+    page = 1
+    while haskey(links["pages"], "next")
+        uri = links["pages"]["next"]
+        body = get_data(client, uri)
+
+        links = body["links"]
+        data = body["actions"]
+
+        for (i, action) in enumerate(data)
+            actions[page*MAXOBJECTS + i] = Action(action)
+        end
+
+        page += 1
     end
 
     actions

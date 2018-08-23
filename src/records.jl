@@ -78,40 +78,40 @@ function create_domain_record(client::AbstractClient, domain_name::String,
     post_body["type"] = record_type
 
     if record_type in ("A", "AAAA", "CAA", "CNAME", "MX", "TXT", "SRV", "NS")
-        if !(record_type in ("MX", "NS") || "name" in keys(post_body))
+        if !(record_type in ("MX", "NS") || haskey(post_body, "name"))
             error("'name' is a required argument for type '$(record_type)'")
         end
 
-        if !("data" in keys(post_body))
+        if !haskey(post_body, "data")
             error("'data' is a required argument for type '$(record_type)'")
         end
     end
 
-    if record_type in ("SRV", "MX") && !("priority" in keys(post_body))
+    if record_type in ("SRV", "MX") && !haskey(post_body, "priority")
         error("'priority' is a required argument for type '$(record_type)'")
     end
 
     if record_type == "SRV"
-        if !("port" in keys("post_body"))
+        if !haskey("post_body", "port")
             error("'port' is a required argument for type '$(record_type)'")
         end
 
-        if !("weight" in keys(post_body))
+        if !haskey(post_body, "weight")
             error("'weight' is a required argument for type '$(record_type)'")
         end
     end
 
     if record_type == "CAA"
-        if !("flags" in keys(post_body))
+        if !haskey(post_body, "flags")
             error("'flags' is a required argument for type '$(record_type)'")
         end
 
-        if !("tag" in keys(post_body))
+        if !haskey(post_body, "tag")
             error("'tag' is a required argument for type '$(record_type)'")
         end
     end
 
-    if !("ttl" in keys(post_body))
+    if !haskey(post_body, "ttl")
         error("'ttl' is a required argument")
     end
 

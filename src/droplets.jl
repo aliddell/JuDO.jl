@@ -66,14 +66,14 @@ struct Droplet
         data["image"] = Image(data["image"])
         data["size"] = Size(data["size"])
 
-        if "v4" in keys(data["networks"])
+        if haskey(data["networks"], "v4")
             networks = Array{Network, 1}(UndefInitializer(), length(data["networks"]["v4"]))
             for (j, network) in enumerate(data["networks"]["v4"])
                 networks[j] = Network(network)
             end
             data["networks"]["v4"] = networks
         end
-        if "v6" in keys(data["networks"])
+        if haskey(data["networks"], "v6")
             networks = Array{Network, 1}(UndefInitializer(), length(data["networks"]["v6"]))
             for (j, network) in enumerate(data["networks"]["v6"])
                 networks[j] = Network(network)
@@ -192,23 +192,23 @@ end
 function create_droplet(client::AbstractClient; kwargs...)
     post_body = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
 
-    if !("name" in keys(post_body))
+    if !haskey(post_body, "name")
         error("'name' is a required argument")
     end
 
-    if !("region" in keys(post_body))
+    if !haskey(post_body, "region")
         error("'region' is a required argument")
     elseif post_body["region"] isa Region
         post_body["region"] = post_body["region"].slug
     end
 
-    if !("size" in keys(post_body))
+    if !haskey(post_body, "size")
         error("'size' is a required argument")
     elseif post_body["size"] isa Size
         post_body["size"] = post_body["size"].slug
     end
 
-    if !("image" in keys(post_body))
+    if !haskey(post_body, "image")
         error("'image' is a required argument")
     elseif post_body["image"] isa Image
         if post_body["image"].slug.hasvalue

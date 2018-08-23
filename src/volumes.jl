@@ -49,11 +49,11 @@ end
 function create_volume(client::AbstractClient; kwargs...)
     post_body = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
 
-    if !("size_gigabytes" in keys(post_body))
+    if !haskey(post_body, "size_gigabytes")
         error("'size_gigabytes' is a required argument")
     end
 
-    if !("name" in keys(post_body))
+    if !haskey(post_body, "name")
         error("'name' is a required argument")
     end
 
@@ -118,7 +118,7 @@ function create_snapshot_from_volume(client::AbstractClient, volume_id::String;
                                      kwargs...)
     post_body = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
 
-    if !("name" in keys(post_body))
+    if !haskey(post_body, "name")
         error("'name' is a required argument")
     end
 
@@ -146,7 +146,7 @@ end
 function attach_volume(client::AbstractClient, volume_id::String; kwargs...)
     post_body = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
 
-    if !("droplet_id" in keys(post_body))
+    if !haskey(post_body, "droplet_id")
         error("'droplet_id' is a required argument")
     end
 
@@ -166,11 +166,11 @@ end
 function attach_volume(client::AbstractClient; kwargs...)
     post_body = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
 
-    if !("droplet_id" in keys(post_body))
+    if !haskey(post_body, "droplet_id")
         error("'droplet_id' is a required argument")
     end
 
-    if !("volume_name" in keys(post_body))
+    if !haskey(post_body, "volume_name")
         error("'volume_name' is a required argument")
     end
 
@@ -186,7 +186,7 @@ end
 function remove_volume(client::AbstractClient, volume_id::String; kwargs...)
     post_body = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
 
-    if !("droplet_id" in keys(post_body))
+    if !haskey(post_body, "droplet_id")
         error("'droplet_id' is a required argument")
     end
 
@@ -206,11 +206,11 @@ end
 function remove_volume(client::AbstractClient; kwargs...)
     post_body = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
 
-    if !("droplet_id" in keys(post_body))
+    if !haskey(post_body, "droplet_id")
         error("'droplet_id' is a required argument")
     end
 
-    if !("volume_name" in keys(post_body))
+    if !haskey(post_body, "volume_name")
         error("'volume_name' is a required argument")
     end
 
@@ -226,7 +226,7 @@ end
 function resize_volume(client::AbstractClient, volume_id::String; kwargs...)
     post_body = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
 
-    if !("size_gigabytes" in keys(post_body))
+    if !haskey(post_body, "size_gigabytes")
         error("'size_gigabytes' is a required argument")
     end
 
