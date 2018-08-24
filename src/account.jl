@@ -1,11 +1,11 @@
 struct Account
-    droplet_limit::Integer
-    floating_ip_limit::Integer
+    dropletlimit::Integer
+    floatingiplimit::Integer
     email::String
     uuid::String
-    email_verified::Bool
+    emailverified::Bool
     status::String
-    status_message::String
+    statusmessage::String
 
     function Account(data::Dict{String})
         new(
@@ -24,10 +24,7 @@ function show(io::IO, a::Account)
     print(io, "Account ($(a.email))")
 end
 
-function get_account(client::AbstractClient)
+function getaccount!(client::AbstractClient)
     uri = joinpath(ENDPOINT, "account")
-    body = get_data(client, uri)
-
-    data = body["account"]
-    account = Account(data)
+    Account(getdata!(client, uri))
 end

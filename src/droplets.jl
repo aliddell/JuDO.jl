@@ -1,8 +1,8 @@
 struct Network
     gateway::String
-    ip_address::String
+    ipaddress::String
     netmask::String
-    ntype::String
+    networktype::String
 
     function Network(data::Dict{String})
         new(
@@ -15,7 +15,7 @@ struct Network
 end
 
 function show(io::IO, n::Network)
-    print(io, "Network ($(n.ip_address))")
+    print(io, "Network ($(n.ipaddress))")
 end
 
 struct Kernel
@@ -45,18 +45,18 @@ struct Droplet
     locked::Bool
     created_at::DateTime
     status::String
-    backup_ids::Array{Integer, 1}
-    snapshot_ids::Array{Integer, 1}
+    backupids::Array{Integer, 1}
+    snapshotids::Array{Integer, 1}
     features::Array{String, 1}
     region::Region
     image::Image
     size::Size
-    size_slug::String
+    sizeslug::String
     networks::Dict{String, Array{Network, 1}}
     kernel::Union{Nothing, Kernel}
-    next_backup_window::Union{Nothing, Dict{String, DateTime}}
+    nextbackupwindow::Union{Nothing, Dict{String, DateTime}}
     tags::Array{String, 1}
-    volume_ids::Array{Integer, 1}
+    volumeids::Array{Integer, 1}
 
     function Droplet(data::Dict{String})
         # we assume all DO datetimes are in UTC
@@ -122,15 +122,10 @@ function show(io::IO, d::Droplet)
     print(io, "Droplet ($(d.name))")
 end
 
-function get_all_droplets(client::AbstractClient)
-    uri = joinpath(ENDPOINT, "droplets?per_page=200")
-    body = get_data(client, uri)
-
-    meta = body["meta"]
-    links = body["links"]
-    data = body["droplets"]
-
-    droplets = Array{Droplet, 1}(UndefInitializer(), meta["total"])
+function getalldroplets!(client::AbstractClient)
+    uri = joinpath(ENDPOINT, "droplets")
+    data = getdata!(client, uri)
+    droplets = Array{Droplet, 1}(UndefInitializer(), length(data))
 
     for (i, droplet) in enumerate(data)
         droplets[i] = Droplet(droplet)
@@ -139,27 +134,19 @@ function get_all_droplets(client::AbstractClient)
     droplets
 end
 
-function get_droplet(client::AbstractClient, droplet_id::Integer)
+function getdroplet!(client::AbstractClient, droplet_id::Integer)
     uri = joinpath(ENDPOINT, "droplets", "$(droplet_id)")
-    body = get_data(client, uri)
-
-    data = body["droplet"]
-    droplet = Droplet(data)
+    Droplet(getdata!(client, uri))
 end
 
-function get_droplet(client::AbstractClient, droplet::Droplet)
-    get_droplet(client, droplet.id)
+function getdroplet!(client::AbstractClient, droplet::Droplet)
+    getdroplet!(client, droplet.id)
 end
 
-function get_droplets_by_tag(client::AbstractClient, tag::String)
-    uri = joinpath(ENDPOINT, "droplets?tag_name=$(tag)&per_page=200")
-    body = get_data(client, uri)
-
-    meta = body["meta"]
-    links = body["links"]
-    data = body["droplets"]
-
-    droplets = Array{Droplet, 1}(UndefInitializer(), meta["total"])
+function getdropletsbytag!(client::AbstractClient, tag::String)
+    uri = joinpath(ENDPOINT, "droplets?tag_name=$(tag)&per_page=$MAXOBJECTS")
+    data = getdata!(client, uri)
+    droplets = Array{Droplet, 1}(UndefInitializer(), length(data))
 
     for (i, droplet) in enumerate(data)
         droplets[i] = Droplet(droplet)
@@ -168,15 +155,10 @@ function get_droplets_by_tag(client::AbstractClient, tag::String)
     droplets
 end
 
-function get_all_droplet_kernels(client::AbstractClient, droplet_id::Integer)
-    uri = joinpath(ENDPOINT, "droplets", "$(droplet_id)", "kernels?per_page=200")
-    body = get_data(client, uri)
-
-    meta = body["meta"]
-    links = body["links"]
-    data = body["kernels"]
-
-    kernels = Array{Kernel, 1}(UndefInitializer(), meta["total"])
+function getalldropletkernels!(client::AbstractClient, droplet_id::Integer)
+    uri = joinpath(ENDPOINT, "droplets", "$(droplet_id)", "kernels")
+    data = getdata!(client, uri)
+    kernels = Array{Kernel, 1}(UndefInitializer(), length(data))
 
     for (i, kernel) in enumerate(data)
         kernels[i] = Kernel(kernel)
@@ -185,51 +167,48 @@ function get_all_droplet_kernels(client::AbstractClient, droplet_id::Integer)
     kernels
 end
 
-function get_all_droplet_kernels(client::AbstractClient, droplet::Droplet)
-    get_all_droplet_kernels(client, droplet.id)
+function getalldropletkernels!(client::AbstractClient, droplet::Droplet)
+    getalldropletkernels!(client, droplet.id)
 end
 
-function create_droplet(client::AbstractClient; kwargs...)
-    post_body = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
+function createdroplet!(client::AbstractClient; kwargs...)
+    postbody = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
 
-    if !haskey(post_body, "name")
+    if !haskey(postbody, "name")
         error("'name' is a required argument")
     end
 
-    if !haskey(post_body, "region")
+    if !haskey(postbody, "region")
         error("'region' is a required argument")
-    elseif post_body["region"] isa Region
-        post_body["region"] = post_body["region"].slug
+    elseif postbody["region"] isa Region
+        postbody["region"] = postbody["region"].slug
     end
 
-    if !haskey(post_body, "size")
+    if !haskey(postbody, "size")
         error("'size' is a required argument")
-    elseif post_body["size"] isa Size
-        post_body["size"] = post_body["size"].slug
+    elseif postbody["size"] isa Size
+        postbody["size"] = postbody["size"].slug
     end
 
-    if !haskey(post_body, "image")
+    if !haskey(postbody, "image")
         error("'image' is a required argument")
-    elseif post_body["image"] isa Image
-        if post_body["image"].slug.hasvalue
-            post_body["image"] = post_body["image"].slug
+    elseif postbody["image"] isa Image
+        if postbody["image"].slug.hasvalue
+            postbody["image"] = postbody["image"].slug
         else
-            post_body["image"] = post_body["image"].id
+            postbody["image"] = postbody["image"].id
         end
     end
 
     uri = joinpath(ENDPOINT, "droplets")
-    body = post_data(client, uri, post_body)
-
-    data = body["droplet"]
-    droplet = Droplet(data)
+    Droplet(postdata!(client, uri, postbody))
 end
 
-function delete_droplet(client::AbstractClient, droplet_id::Integer)
+function deletedroplet!(client::AbstractClient, droplet_id::Integer)
     uri = joinpath(ENDPOINT, "droplets", "$(droplet_id)")
-    delete_data(client, uri)
+    deletedata!(client, uri)
 end
 
-function delete_droplet(client::AbstractClient, droplet::Droplet)
-    delete_droplet(client, droplet.id)
+function deletedroplet!(client::AbstractClient, droplet::Droplet)
+    deletedroplet!(client, droplet.id)
 end

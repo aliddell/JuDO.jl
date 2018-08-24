@@ -1,4 +1,4 @@
-volumes = getallvolumes!(test_client)
+volumes = getallvolumes!(testclient)
 
 @testset "List all Volumes" begin
     @test length(volumes) == 2
@@ -8,11 +8,11 @@ volumes = getallvolumes!(test_client)
     @test 19486237 in volumes[2].droplet_ids
     @test volumes[2].name == "another-example"
     @test volumes[2].description == "A bigger example volume"
-    @test volumes[2].size_gigabytes == 500
+    @test volumes[2].sizegigabytes == 500
     @test volumes[2].created_at == DateTime("2016-03-05T17:00:49")
 end;
 
-volume = createvolume!(test_client; size_gigabytes=10, name="example",
+volume = createvolume!(testclient; sizegigabytes=10, name="example",
                        description="Block store for examples",
                        region="nyc1")
 
@@ -23,11 +23,11 @@ volume = createvolume!(test_client; size_gigabytes=10, name="example",
     @test isempty(volume.droplet_ids)
     @test volume.name == "example"
     @test volume.description == "Block store for examples"
-    @test volume.size_gigabytes == 10
+    @test volume.sizegigabytes == 10
     @test volume.created_at == DateTime("2016-03-02T17:00:49")
 end;
 
-volume = getvolume!(test_client, volume)
+volume = getvolume!(testclient, volume)
 
 @testset "Retrieve an existing Volume" begin
     @test volume.id == "506f78a4-e098-11e5-ad9f-000f53306ae1"
@@ -36,12 +36,12 @@ volume = getvolume!(test_client, volume)
     @test isempty(volume.droplet_ids)
     @test volume.name == "example"
     @test volume.description == "Block store for examples"
-    @test volume.size_gigabytes == 10
+    @test volume.sizegigabytes == 10
     @test volume.created_at == DateTime("2016-03-02T17:00:49")
 end;
 
 volume_id = "82a48a18-873f-11e6-96bf-000f53315a41"
-snapshots = getallvolumesnapshots!(test_client, volume_id)
+snapshots = getallvolumesnapshots!(testclient, volume_id)
 
 @testset "List Snapshots for a Volume" begin
     @test length(snapshots) == 1
@@ -52,10 +52,10 @@ snapshots = getallvolumesnapshots!(test_client, volume_id)
     @test snapshots[1].resourceid == "82a48a18-873f-11e6-96bf-000f53315a41"
     @test snapshots[1].resourcetype == "volume"
     @test snapshots[1].min_disk_size == 10
-    @test snapshots[1].size_gigabytes == 0
+    @test snapshots[1].sizegigabytes == 0
 end;
 
-snapshot = snapshotvolume!(test_client, volume_id;
+snapshot = snapshotvolume!(testclient, volume_id;
                                        name="big-data-snapshot1475261774")
 
 @testset "Create a Snapshot from a Volume" begin
@@ -66,14 +66,14 @@ snapshot = snapshotvolume!(test_client, volume_id;
     @test snapshot.resourceid == "82a48a18-873f-11e6-96bf-000f53315a41"
     @test snapshot.resourcetype == "volume"
     @test snapshot.min_disk_size == 10
-    @test snapshot.size_gigabytes == 0
+    @test snapshot.sizegigabytes == 0
 end;
 
 @testset "Delete a Volume" begin
-    @test deletevolume!(test_client, volume)
+    @test deletevolume!(testclient, volume)
 end;
 
-action = attachvolume!(test_client, "7724db7c-e098-11e5-b522-000f53304e51";
+action = attachvolume!(testclient, "7724db7c-e098-11e5-b522-000f53304e51";
                        droplet_id=11612190)
 
 @testset "Attach a Volume to a Droplet" begin
@@ -86,7 +86,7 @@ action = attachvolume!(test_client, "7724db7c-e098-11e5-b522-000f53304e51";
     @test action.resourcetype == "volume"
 end;
 
-action = removevolume!(test_client, "7724db7c-e098-11e5-b522-000f53304e51";
+action = removevolume!(testclient, "7724db7c-e098-11e5-b522-000f53304e51";
                        droplet_id=11612190, region="nyc1")
 
 @testset "Remove a Volume from a Droplet" begin
@@ -99,8 +99,8 @@ action = removevolume!(test_client, "7724db7c-e098-11e5-b522-000f53304e51";
     @test action.resourcetype == "backend"
 end;
 
-action = resizevolume!(test_client, "7724db7c-e098-11e5-b522-000f53304e51";
-                       size_gigabytes=10, region="nyc1")
+action = resizevolume!(testclient, "7724db7c-e098-11e5-b522-000f53304e51";
+                       sizegigabytes=10, region="nyc1")
 
 @testset "Resize a Volume" begin
     @test action.id == 72531856
@@ -112,7 +112,7 @@ action = resizevolume!(test_client, "7724db7c-e098-11e5-b522-000f53304e51";
     @test action.resourcetype == "volume"
 end;
 
-actions = getallvolumeactions!(test_client, "7724db7c-e098-11e5-b522-000f53304e51")
+actions = getallvolumeactions!(testclient, "7724db7c-e098-11e5-b522-000f53304e51")
 
 @testset "List all Actions for a Volume" begin
     @test length(actions) == 1
@@ -125,7 +125,7 @@ actions = getallvolumeactions!(test_client, "7724db7c-e098-11e5-b522-000f53304e5
     @test actions[1].resourcetype == "volume"
 end;
 
-action = getvolumeaction!(test_client, "7724db7c-e098-11e5-b522-000f53304e51",
+action = getvolumeaction!(testclient, "7724db7c-e098-11e5-b522-000f53304e51",
                            72531856)
 
 @testset "Retrieve an existing Volume Action" begin

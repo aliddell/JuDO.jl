@@ -3,10 +3,10 @@ struct Snapshot
     name::String
     created_at::DateTime
     regions::Array{String, 1}
-    resource_id::String
-    resource_type::String
+    resourceid::String
+    resourcetype::String
     min_disk_size::Real
-    size_gigabytes::Real
+    sizegigabytes::Real
 
     function Snapshot(data::Dict{String})
         data["created_at"] = DateTime(data["created_at"][1:end-1])
@@ -28,11 +28,11 @@ function show(io::IO, s::Snapshot)
     print(io, "$(s.name)")
 end
 
-function delete_snapshot(client::AbstractClient, snapshot_id::Integer)
+function deletesnapshot!(client::AbstractClient, snapshot_id::Integer)
     uri = joinpath(ENDPOINT, "snapshots", "$(snapshot_id)")
-    delete_data(client, uri)
+    deletedata!(client, uri)
 end
 
-function delete_snapshot(client::AbstractClient, snapshot::Snapshot)
-    delete_data(client, snapshot.id)
+function deletesnapshot!(client::AbstractClient, snapshot::Snapshot)
+    deletedata!(client, snapshot.id)
 end

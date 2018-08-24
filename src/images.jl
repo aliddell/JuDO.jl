@@ -7,7 +7,7 @@ struct Image
     public::Bool
     regions::Array{String, 1}
     min_disk_size::Integer
-    size_gigabytes::Real
+    sizegigabytes::Real
     created_at::DateTime
 
     function Image(data::Dict{String})
@@ -33,15 +33,10 @@ function show(io::IO, i::Image)
     print(io, "Image ($(i.distribution) $(i.name))")
 end
 
-function get_all_images(client::AbstractClient)
-    uri = joinpath(ENDPOINT, "images?per_page=200")
-    body = get_data(client, uri)
-
-    meta = body["meta"]
-    links = body["links"]
-    data = body["images"]
-
-    images = Array{Image, 1}(UndefInitializer(), meta["total"])
+function getallimages!(client::AbstractClient)
+    uri = joinpath(ENDPOINT, "images")
+    data = getdata!(client, uri)
+    images = Array{Image, 1}(UndefInitializer(), length(data))
 
     for (i, image) in enumerate(data)
         images[i] = Image(image)

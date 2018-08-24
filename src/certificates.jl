@@ -1,8 +1,8 @@
 struct Certificate
     id::String
     name::String
-    not_after::DateTime
-    sha1_fingerprint::String
+    notafter::DateTime
+    sha1fingerprint::String
     created_at::DateTime
 
     function Certificate(data::Dict{String})
@@ -23,15 +23,10 @@ function show(io::IO, c::Certificate)
     print(io, "Certificate ($(c.name))")
 end
 
-function get_all_certificates(client::AbstractClient)
-    uri = joinpath(ENDPOINT, "certificates?per_page=200")
-    body = get_data(client, uri)
-
-    meta = body["meta"]
-    links = body["links"]
-    data = body["certificates"]
-
-    certificates = Array{Certificate, 1}(UndefInitializer(), meta["total"])
+function getallcertificates!(client::AbstractClient)
+    uri = joinpath(ENDPOINT, "certificates?per_page=$MAXOBJECTS")
+    data = getdata!(client, uri)
+    certificates = Array{Certificate, 1}(UndefInitializer(), length(data))
 
     for (i, certificate) in enumerate(data)
         certificates[i] = Certificate(certificate)
@@ -40,45 +35,39 @@ function get_all_certificates(client::AbstractClient)
     certificates
 end
 
-function get_certificate(client::AbstractClient, certificate_id::String)
-    uri = joinpath(ENDPOINT, "certificates", "$(certificate_id)")
-    body = get_data(client, uri)
-
-    data = body["certificate"]
-    certificate = Certificate(data)
+function getcertificate!(client::AbstractClient, certificateid::String)
+    uri = joinpath(ENDPOINT, "certificates", "$(certificateid)")
+    Certificate(getdata!(client, uri))
 end
 
-function get_certificate(client::AbstractClient, certificate::Certificate)
-    get_certificate(client, certificate.id)
+function getcertificate!(client::AbstractClient, certificate::Certificate)
+    getcertificate!(client, certificate.id)
 end
 
-function create_certificate(client::AbstractClient; kwargs...)
-    post_body = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
+function createcertificate!(client::AbstractClient; kwargs...)
+    postbody = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
 
-    if !haskey(post_body, "name")
+    if !haskey(postbody, "name")
         error("'name' is a required argument")
     end
 
-    if !haskey(post_body, "private_key")
+    if !haskey(postbody, "private_key")
         error("'private_key' is a required argument")
     end
 
-    if !haskey(post_body, "leaf_certificate")
+    if !haskey(postbody, "leaf_certificate")
         error("'leaf_certificate' is a required argument")
     end
 
     uri = joinpath(ENDPOINT, "certificates")
-    body = post_data(client, uri, post_body)
-
-    data = body["certificate"]
-    certificate = Certificate(data)
+    Certificate(postdata!(client, uri, postbody))
 end
 
-function delete_certificate(client::AbstractClient, certificate_id::String)
-    uri = joinpath(ENDPOINT, "certificates", certificate_id)
-    delete_data(client, uri)
+function deletecertificate!(client::AbstractClient, certificateid::String)
+    uri = joinpath(ENDPOINT, "certificates", certificateid)
+    deletedata!(client, uri)
 end
 
-function delete_certificate(client::AbstractClient, certificate::Certificate)
-    delete_certificate(client, certificate.id)
+function deletecertificate!(client::AbstractClient, certificate::Certificate)
+    deletecertificate!(client, certificate.id)
 end

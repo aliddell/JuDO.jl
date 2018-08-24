@@ -7,15 +7,15 @@ import JSON: parse, json
 
 export AbstractClient, Client
 
-export Account, get_account
-export Action, get_all_actions, get_action
-export Certificate, get_all_certificates, get_certificate, create_certificate,
-       delete_certificate
-export Domain, get_all_domains, create_domain, get_domain, delete_domain
-export Volume, get_all_volumes, create_volume, get_volume,
-       get_all_volume_snapshots, create_snapshot_from_volume, delete_volume,
-       attach_volume, remove_volume, resize_volume, get_all_volume_actions,
-       get_volume_action
+export Account, getaccount!
+export Action, getallactions!, getaction!
+export Certificate, getallcertificates!, getcertificate!, createcertificate!,
+       deletecertificate!
+export Domain, getalldomains!, createdomain!, getdomain!, deletedomain!
+export Volume, getallvolumes!, createvolume!, getvolume!,
+       getallvolumesnapshots!, snapshotvolume!, deletevolume!,
+       attachvolume!, removevolume!, resizevolume!, getallvolumeactions!,
+       getvolumeaction!
 
 include("client.jl")
 include("regions.jl")

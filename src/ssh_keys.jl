@@ -18,8 +18,8 @@ function show(io::IO, s::SSHKey)
     print(io, "SSHKey ($(s.name))")
 end
 
-function get_all_ssh_keys(client::AbstractClient)
-    response = get_data(client, joinpath(ENDPOINT, "account", "keys?per_page=200"))
+function getallsshkeys!(client::AbstractClient)
+    response = getdata!(client, joinpath(ENDPOINT, "account", "keys"))
 
     if floor(response.status/100) == 2 # OK
         body = parse(String(response.body))
@@ -39,8 +39,8 @@ function get_all_ssh_keys(client::AbstractClient)
     ssh_keys
 end
 
-function get_ssh_key(client::AbstractClient, key_id::Union{Integer, String})
-    response = get_data(client, joinpath(ENDPOINT, "account", "keys", "$key_id"))
+function getsshkey!(client::AbstractClient, key_id::Union{Integer, String})
+    response = getdata!(client, joinpath(ENDPOINT, "account", "keys", "$key_id"))
 
     if floor(response.status/100) == 2 # OK
         body = parse(String(response.body))
@@ -52,11 +52,11 @@ function get_ssh_key(client::AbstractClient, key_id::Union{Integer, String})
     end
 end
 
-function get_ssh_key(client::AbstractClient, key::SSHKey)
-    get_ssh_key(client, key.id)
+function getsshkey!(client::AbstractClient, key::SSHKey)
+    getsshkey!(client, key.id)
 end
 
-function create_ssh_key(client::AbstractClient; kwargs...)
+function createsshkey!(client::AbstractClient; kwargs...)
     body = Dict([String(k[1]) => k[2] for k in kwargs])
 
     if !haskey(body, "name")
@@ -67,7 +67,7 @@ function create_ssh_key(client::AbstractClient; kwargs...)
         error("'public_key' is a required argument")
     end
 
-    response = post_data(client, joinpath(ENDPOINT, "account", "keys"), body)
+    response = postdata!(client, joinpath(ENDPOINT, "account", "keys"), body)
 
     if floor(response.status/100) == 2 # OK
         body = parse(String(response.body))
@@ -87,7 +87,7 @@ function update_ssh_key(client::AbstractClient, key_id::Union{Integer, String}; 
     end
 
     uri = joinpath(ENDPOINT, "account", "keys", "$(key_id)")
-    response = put_data(client, uri, body)
+    response = putdata!(client, uri, body)
 
     if floor(response.status/100) == 2 # OK
         body = parse(String(response.body))
@@ -103,10 +103,10 @@ function update_ssh_key(client::AbstractClient, key::SSHKey; kwargs...)
     update_ssh_key(client, key.id; kwargs...)
 end
 
-function delete_ssh_key(client::AbstractClient, key_id::Union{Integer, String})
-    delete_data(client, joinpath(ENDPOINT, "account", "keys", "$(key_id)"))
+function deletesshkey!(client::AbstractClient, key_id::Union{Integer, String})
+    deletedata!(client, joinpath(ENDPOINT, "account", "keys", "$(key_id)"))
 end
 
-function delete_ssh_key(client::AbstractClient, key::SSHKey)
-    delete_ssh_key(client, key.id)
+function deletesshkey!(client::AbstractClient, key::SSHKey)
+    deletesshkey!(client, key.id)
 end

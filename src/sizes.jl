@@ -28,8 +28,8 @@ function show(io::IO, s::Size)
     print(io, "Size ($(s.slug))")
 end
 
-function get_all_sizes(client::AbstractClient)
-    response = get_data(client, joinpath(ENDPOINT, "sizes?per_page=200"))
+function getallsizes!(client::AbstractClient)
+    response = getdata!(client, joinpath(ENDPOINT, "sizes"))
 
     if floor(response.status/100) == 2 # OK
         body = parse(String(response.body))

@@ -61,7 +61,7 @@ function deletedata!(client::TestClient, uri::String)
     true
 end
 
-test_client = TestClient("fake token")
+testclient = TestClient("fake token")
 
 # account tests
 include("testaccount.jl")

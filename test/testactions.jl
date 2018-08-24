@@ -1,4 +1,4 @@
-actions = getallactions!(test_client)
+actions = getallactions!(testclient)
 
 @testset "List all Actions" begin
     @test actions[1].id == 36804636
@@ -12,7 +12,7 @@ actions = getallactions!(test_client)
     @test actions[1].regionslug == "nyc3"
 end;
 
-action = getaction!(test_client, 36804636)
+action = getaction!(testclient, 36804636)
 
 @testset "Retrieve an existing Action" begin
     @test action.id == 36804636

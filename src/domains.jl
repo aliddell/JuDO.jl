@@ -1,7 +1,7 @@
 struct Domain
     name::String
     ttl::Integer
-    zone_file::Union{Nothing, String}
+    zonefile::Union{Nothing, String}
 
     function Domain(data::Dict{String})
         new(
@@ -16,15 +16,10 @@ function show(io::IO, d::Domain)
     print(io, "Domain ($(d.name))")
 end
 
-function get_all_domains(client::AbstractClient)
-    uri = joinpath(ENDPOINT, "domains?per_page=200")
-    body = get_data(client, uri)
-
-    meta = body["meta"]
-    links = body["links"]
-
-    data = body["domains"]
-    domains = Array{Domain, 1}(UndefInitializer(), meta["total"])
+function getalldomains!(client::AbstractClient)
+    uri = joinpath(ENDPOINT, "domains?per_page=$MAXOBJECTS")
+    data = getdata!(client, uri)
+    domains = Array{Domain, 1}(UndefInitializer(), length(data))
 
     for (i, domain) in enumerate(data)
         domains[i] = Domain(domain)
@@ -33,41 +28,35 @@ function get_all_domains(client::AbstractClient)
     domains
 end
 
-function get_domain(client::AbstractClient, domain_name::String)
+function getdomain!(client::AbstractClient, domain_name::String)
     uri = joinpath(ENDPOINT, "domains", domain_name)
-    body = get_data(client, uri)
-
-    data = body["domain"]
-    domain = Domain(data)
+    Domain(getdata!(client, uri))
 end
 
-function get_domain(client::AbstractClient, domain::Domain)
-    get_domain(client, domain.name)
+function getdomain!(client::AbstractClient, domain::Domain)
+    getdomain!(client, domain.name)
 end
 
-function create_domain(client::AbstractClient; kwargs...)
-    post_body = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
+function createdomain!(client::AbstractClient; kwargs...)
+    postbody = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
 
-    if !haskey(post_body, "name")
+    if !haskey(postbody, "name")
         error("'name' is a required argument")
     end
 
-    if !haskey(post_body, "ip_address")
+    if !haskey(postbody, "ip_address")
         error("'ip_address' is a required argument")
     end
 
     uri = joinpath(ENDPOINT, "domains")
-    body = post_data(client, uri, post_body)
-
-    data = body["domain"]
-    domain = Domain(data)
+    Domain(postdata!(client, uri, postbody))
 end
 
-function delete_domain(client::AbstractClient, domain_name::String)
+function deletedomain!(client::AbstractClient, domain_name::String)
     uri = joinpath(ENDPOINT, "domains", domain_name)
-    delete_data(client, uri)
+    deletedata!(client, uri)
 end
 
-function delete_domain(client::AbstractClient, domain::Domain)
-    delete_domain(client, domain.name)
+function deletedomain!(client::AbstractClient, domain::Domain)
+    deletedomain!(client, domain.name)
 end
