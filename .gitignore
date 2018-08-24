@@ -1,3 +1,4 @@
+.env
 *.jl.cov
 *.jl.*.cov
 *.jl.mem

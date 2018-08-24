@@ -1,17 +1,20 @@
 using JuDO
 using Test
+using DotEnv
 
 import Dates: DateTime
-import JuDO: get_data, post_data, put_data, delete_data, ENDPOINT, MAXOBJECTS
+import JuDO: getdata!, postdata!, putdata!, deletedata!, ENDPOINT, MAXOBJECTS
 import JSON: parse
 
-DATA_DIR = joinpath(dirname(abspath(@__FILE__)), "data")
+DotEnv.config()
+
+DATADIR = joinpath(dirname(abspath(@__FILE__)), "data")
 
 struct TestClient <: AbstractClient
     token::String
 end
 
-function get_data(client::TestClient, uri::String)
+function getdata!(client::TestClient, uri::String)
     uri = replace(uri, ENDPOINT => "")
     # strip off query string
     idx = findfirst(isequal('?'), uri)
@@ -19,60 +22,59 @@ function get_data(client::TestClient, uri::String)
         uri = uri[1:idx-1]
     end
 
-    path = joinpath(DATA_DIR, uri, "get.json")
+    path = joinpath(DATADIR, uri, "get.json")
     data = open(path, "r") do io
         parse(read(io, String))
     end
 
-    # remove "next" to prevent infinite loops
-    if haskey(data, "links") && haskey(data["links"], "pages")
-        delete!(data["links"]["pages"], "next")
-    end
-
-    data
+    # get the only key which is neither meta or links
+    pkey = pop!(setdiff(keys(data), ["meta", "links"]))
+    data[pkey]
 end
 
-function post_data(client::TestClient, uri::String, body::Dict{String})
+function postdata!(client::TestClient, uri::String, body::Dict{String})
     if endswith(uri, "actions")
-        path = joinpath(DATA_DIR, replace(uri, ENDPOINT => ""),
+        path = joinpath(DATADIR, replace(uri, ENDPOINT => ""),
                         "$(body["type"]).json")
     else
-        path = joinpath(DATA_DIR, replace(uri, ENDPOINT => ""), "post.json")
+        path = joinpath(DATADIR, replace(uri, ENDPOINT => ""), "post.json")
     end
-    open(path, "r") do io
+    data = open(path, "r") do io
         parse(read(io, String))
     end
+
+    # data should have only one key
+    pop!(data).second
 end
 
-function put_data(client::TestClient, uri::String, body::Dict{String})
-    path = joinpath(DATA_DIR, uri, "put.json")
-    open(path, "r") do io
+function putdata!(client::TestClient, uri::String, body::Dict{String})
+    path = joinpath(DATADIR, uri, "put.json")
+    data = open(path, "r") do io
         parse(read(io, String))
     end
+
+    # data should have only one key
+    pop!(data).second
 end
 
-function delete_data(client::TestClient, uri::String)
+function deletedata!(client::TestClient, uri::String)
     true
 end
 
 test_client = TestClient("fake token")
 
 # account tests
-include("test_account.jl")
-
+include("testaccount.jl")
 # action tests
-include("test_actions.jl")
-
+include("testactions.jl")
 # certificate tests
-include("test_certificates.jl")
-
+include("testcertificates.jl")
 # domain tests
-include("test_domains.jl")
-
+include("testdomains.jl")
 # volume tests
-include("test_volumes.jl")
+include("testvolumes.jl")
 
 # real client test
-if haskey(ENV, "dotok")
-    client = Client(ENV["dotok"])
+if haskey(ENV, "DOTOKEN")
+    client = Client(ENV["DOTOKEN"])
 end
