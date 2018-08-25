@@ -4,6 +4,9 @@ struct Certificate
     notafter::DateTime
     sha1fingerprint::String
     created_at::DateTime
+    dnsnames::Array{String, 1}
+    state::String
+    certificatetype::String
 
     function Certificate(data::Dict{String})
         data["not_after"] = DateTime(data["not_after"][1:end-1])
@@ -14,7 +17,10 @@ struct Certificate
             data["name"],
             data["not_after"],
             data["sha1_fingerprint"],
-            data["created_at"]
+            data["created_at"],
+            data["dns_names"],
+            data["state"],
+            data["type"]
         )
     end
 end
@@ -23,18 +29,13 @@ function show(io::IO, c::Certificate)
     print(io, "Certificate ($(c.name))")
 end
 
+# List all certificates
 function getallcertificates!(client::AbstractClient)
     uri = joinpath(ENDPOINT, "certificates?per_page=$MAXOBJECTS")
-    data = getdata!(client, uri)
-    certificates = Array{Certificate, 1}(UndefInitializer(), length(data))
-
-    for (i, certificate) in enumerate(data)
-        certificates[i] = Certificate(certificate)
-    end
-
-    certificates
+    getalldata!(client, uri, Certificate)
 end
 
+# Retrieve an existing certificate
 function getcertificate!(client::AbstractClient, certificateid::String)
     uri = joinpath(ENDPOINT, "certificates", "$(certificateid)")
     Certificate(getdata!(client, uri))
@@ -44,20 +45,11 @@ function getcertificate!(client::AbstractClient, certificate::Certificate)
     getcertificate!(client, certificate.id)
 end
 
-function createcertificate!(client::AbstractClient; kwargs...)
-    postbody = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
-
-    if !haskey(postbody, "name")
-        error("'name' is a required argument")
-    end
-
-    if !haskey(postbody, "private_key")
-        error("'private_key' is a required argument")
-    end
-
-    if !haskey(postbody, "leaf_certificate")
-        error("'leaf_certificate' is a required argument")
-    end
+function createcertificate!(client::AbstractClient; name::String, private_key::String,
+                            leaf_certificate::String, kwargs...)
+    postbody = Dict{String, Any}("name" => name, "private_key" => private_key,
+                                 "leaf_certificate" => leaf_certificate)
+    merge!(postbody, Dict{String, Any}([String(k[1]) => k[2] for k in kwargs]))
 
     uri = joinpath(ENDPOINT, "certificates")
     Certificate(postdata!(client, uri, postbody))
