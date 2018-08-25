@@ -1,15 +1,17 @@
 volumes = getallvolumes!(testclient)
 
 @testset "List all Volumes" begin
-    @test length(volumes) == 2
-    @test volumes[2].id == "2d2967ff-491d-11e6-860c-000f53315870"
-    @test volumes[2].region.name == "New York 1"
-    @test "metadata" in volumes[2].region.features
-    @test 19486237 in volumes[2].droplet_ids
-    @test volumes[2].name == "another-example"
-    @test volumes[2].description == "A bigger example volume"
-    @test volumes[2].sizegigabytes == 500
-    @test volumes[2].created_at == DateTime("2016-03-05T17:00:49")
+    @test length(volumes) == 1
+    @test volumes[1].id == "506f78a4-e098-11e5-ad9f-000f53306ae1"
+    @test volumes[1].region.name == "New York 1"
+    @test "metadata" in volumes[1].region.features
+    @test "s-3vcpu-1gb" in volumes[1].region.sizes
+    @test isempty(volumes[1].droplet_ids)
+    @test volumes[1].name == "example"
+    @test volumes[1].description == "Block store for examples"
+    @test volumes[1].sizegigabytes == 10
+    @test volumes[1].created_at == DateTime("2016-03-02T17:00:49")
+
 end;
 
 volume = createvolume!(testclient; size_gigabytes=10, name="example",
