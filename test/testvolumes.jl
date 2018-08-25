@@ -12,7 +12,7 @@ volumes = getallvolumes!(testclient)
     @test volumes[2].created_at == DateTime("2016-03-05T17:00:49")
 end;
 
-volume = createvolume!(testclient; sizegigabytes=10, name="example",
+volume = createvolume!(testclient; size_gigabytes=10, name="example",
                        description="Block store for examples",
                        region="nyc1")
 
@@ -100,7 +100,7 @@ action = removevolume!(testclient, "7724db7c-e098-11e5-b522-000f53304e51";
 end;
 
 action = resizevolume!(testclient, "7724db7c-e098-11e5-b522-000f53304e51";
-                       sizegigabytes=10, region="nyc1")
+                       size_gigabytes=10, region="nyc1")
 
 @testset "Resize a Volume" begin
     @test action.id == 72531856

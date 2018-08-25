@@ -1,4 +1,4 @@
-struct Volume
+mutable struct Volume
     id::String
     region::Region
     droplet_ids::Array{Integer,1}
@@ -29,36 +29,38 @@ function show(io::IO, v::Volume)
     print(io, "Volume ($(v.name))")
 end
 
-function getallvolumes!(client::AbstractClient)
-    uri = joinpath(ENDPOINT, "volumes?per_page=$MAXOBJECTS")
-    data = getdata!(client, uri)
-
-    volumes = Array{Volume, 1}(UndefInitializer(), length(data))
-
-    for (i, volume) in enumerate(data)
-        volumes[i] = Volume(volume)
+# List all volumes
+function getallvolumes!(client::AbstractClient; kwargs...)
+    # check if a request for all volumes in a region
+    if haskey(kwargs, "region")
+        if isa(kwargs["region"], String)
+            region = kwargs["region"]
+        elseif isa(kwargs["region"], Region)
+            region = kwargs["region"].slug
+        else
+            error("type not recognized for region: $(typeof(kwargs["region"]))")
+        end
+        query = "&region=$(region)"
+    else
+        query = ""
     end
 
-    volumes
+    uri = joinpath(ENDPOINT, "volumes?per_page=$MAXOBJECTS$query")
+    getalldata!(client, uri, Volume)
 end
 
-function createvolume!(client::AbstractClient; kwargs...)
-    postbody = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
-
-    if !haskey(postbody, "size_gigabytes")
-        error("'sizegigabytes' is a required argument")
-    end
-
-    if !haskey(postbody, "name")
-        error("'name' is a required argument")
-    end
+# Create a new volume
+function createvolume!(client::AbstractClient; name::String, size_gigabytes::Integer, kwargs...)
+    postbody = Dict{String, Any}("name" => name, "size_gigabytes" => size_gigabytes)
+    merge!(postbody, Dict{String, Any}([String(k[1]) => k[2] for k in kwargs]))
 
     uri = joinpath(ENDPOINT, "volumes")
     Volume(postdata!(client, uri, postbody))
 end
 
-function getvolume!(client::AbstractClient, volume_id::String)
-    uri = joinpath(ENDPOINT, "volumes", volume_id)
+# Retrieve an existing volume
+function getvolume!(client::AbstractClient, volumeid::String)
+    uri = joinpath(ENDPOINT, "volumes", volumeid)
     Volume(getdata!(client, uri))
 end
 
@@ -66,48 +68,38 @@ function getvolume!(client::AbstractClient, volume::Volume)
     getvolume!(client, volume.id)
 end
 
-function getvolume!(client::AbstractClient; name::String, regionslug::String)
-    uri = joinpath(ENDPOINT, "volumes?name=$(name)&region=$(regionslug)")
-    data = getdata!(client, uri)
-    volumes = Array{Volume, 1}(UndefInitializer(), length(data))
-
-    for (i, volume) in enumerate(data)
-        volumes[i] = Volume(volume)
+# Retrieve an existing volume by name
+function getvolume!(client::AbstractClient; name::String, region::Union{String, Region})
+    if isa(region, Region)
+        region = region.slug
     end
 
-    volumes
+    uri = joinpath(ENDPOINT, "volumes?name=$(name)&region=$(region)")
+    getalldata!(client, uri, Volume)[1]
 end
 
-function getallvolumesnapshots!(client::AbstractClient, volume_id::String)
-    uri = joinpath(ENDPOINT, "volumes", volume_id, "snapshots?per_page=$MAXOBJECTS")
-    data = getdata!(client, uri)
-    snapshots = Array{Snapshot, 1}(UndefInitializer(), length(data))
-
-    for (i, snapshot) in enumerate(data)
-        snapshots[i] = Snapshot(snapshot)
-    end
-
-    snapshots
+# List snapshots for a volume
+function getallvolumesnapshots!(client::AbstractClient, volumeid::String)
+    uri = joinpath(ENDPOINT, "volumes", volumeid, "snapshots?per_page=$MAXOBJECTS")
+    getalldata!(client, uri, Snapshot)
 end
 
 function getallvolumesnapshots!(client::AbstractClient, volume::Volume)
     getallvolumesnapshots!(client, volume.id)
 end
 
-function snapshotvolume!(client::AbstractClient, volume_id::String;
-                                     kwargs...)
-    postbody = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
+# Create a snapshot from a volume
+function snapshotvolume!(client::AbstractClient, volumeid::String; name::String, kwargs...)
+    postbody = Dict{String, Any}("name" => name)
+    merge!(postbody, Dict{String, Any}([String(k[1]) => k[2] for k in kwargs]))
 
-    if !haskey(postbody, "name")
-        error("'name' is a required argument")
-    end
-
-    uri = joinpath(ENDPOINT, "volumes", volume_id, "snapshots")
+    uri = joinpath(ENDPOINT, "volumes", volumeid, "snapshots")
     Snapshot(postdata!(client, uri, postbody))
 end
 
-function deletevolume!(client::AbstractClient, volume_id::String)
-    uri = joinpath(ENDPOINT, "volumes", volume_id)
+# Delete a volume
+function deletevolume!(client::AbstractClient, volumeid::String)
+    uri = joinpath(ENDPOINT, "volumes", volumeid)
     deletedata!(client, uri)
 end
 
@@ -115,130 +107,79 @@ function deletevolume!(client::AbstractClient, volume::Volume)
     deletevolume!(client, volume.id)
 end
 
-function deletevolume!(client::AbstractClient, volume_name::String, regionslug::String)
-    uri = joinpath(ENDPOINT, "volumes?name=$(volume_name)&region=$(regionslug)")
+# Delete a volume by name
+function deletevolume!(client::AbstractClient; name::String, region::String)
+    uri = joinpath(ENDPOINT, "volumes?name=$(name)&region=$(region)")
     deletedata!(client, uri)
 end
 
-function attachvolume!(client::AbstractClient, volume_id::String; kwargs...)
-    postbody = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
+# Attach a volume to a droplet
+# Attach a volume to a droplet by name (provide volume_name in kwargs)
+function attachvolume!(client::AbstractClient, volumeid::String; droplet_id::Integer, kwargs...)
+    postbody = Dict{String, Any}("type" => "attach", "droplet_id" => droplet_id)
+    merge!(postbody, Dict{String, Any}([String(k[1]) => k[2] for k in kwargs]))
 
-    if !haskey(postbody, "droplet_id")
-        error("'droplet_id' is a required argument")
-    end
-
-    postbody["type"] = "attach"
-
-    uri = joinpath(ENDPOINT, "volumes", volume_id, "actions")
+    uri = joinpath(ENDPOINT, "volumes", volumeid, "actions")
     Action(postdata!(client, uri, postbody))
 end
 
-function attachvolume!(client::AbstractClient, volume::Volume; kwargs...)
-    attachvolume!(client, volume.id; kwargs...)
+function attachvolume!(client::AbstractClient, volume::Volume; droplet_id::Integer, kwargs...)
+    attachvolume!(client, volume.id; droplet_id=droplet_id, kwargs...)
 end
 
-function attachvolume!(client::AbstractClient; kwargs...)
-    postbody = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
+# Remove a volume from a droplet
+# Remove a volume from a droplet by name (provide volume_name in kwargs)
+function removevolume!(client::AbstractClient, volumeid::String; droplet_id::Integer, kwargs...)
+    postbody = Dict{String, Any}("type" => "detach", "droplet_id" => droplet_id)
+    merge!(postbody, Dict{String, Any}([String(k[1]) => k[2] for k in kwargs]))
 
-    if !haskey(postbody, "droplet_id")
-        error("'droplet_id' is a required argument")
-    end
-
-    if !haskey(postbody, "volume_name")
-        error("'volume_name' is a required argument")
-    end
-
-    postbody["type"] = "attach"
-
-    uri = joinpath(ENDPOINT, "volumes", "actions")
+    uri = joinpath(ENDPOINT, "volumes", volumeid, "actions")
     Action(postdata!(client, uri, postbody))
 end
 
-function removevolume!(client::AbstractClient, volume_id::String; kwargs...)
-    postbody = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
+function removevolume!(client::AbstractClient, volume::Volume; droplet_id::Integer, kwargs...)
+    removevolume!(client, volume.id; droplet_id=droplet_id, kwargs...)
+end
 
-    if !haskey(postbody, "droplet_id")
-        error("'droplet_id' is a required argument")
-    end
+# Resize a volume
+function resizevolume!(client::AbstractClient, volumeid::String; size_gigabytes::Integer, kwargs...)
+    postbody = Dict{String, Any}("type" => "resize", "size_gigabytes" => size_gigabytes)
+    merge!(postbody, Dict{String, Any}([String(k[1]) => k[2] for k in kwargs]))
 
-    postbody["type"] = "detach"
-
-    uri = joinpath(ENDPOINT, "volumes", volume_id, "actions")
+    uri = joinpath(ENDPOINT, "volumes", volumeid, "actions")
     Action(postdata!(client, uri, postbody))
 end
 
-function removevolume!(client::AbstractClient, volume::Volume; kwargs...)
-    removevolume!(client, volume.id; kwargs...)
+function resizevolume!(client::AbstractClient, volume::Volume; size_gigabytes::Integer, kwargs...)
+    data = resizevolume!(client, volume.id; kwargs...)
+    volume.size_gigabytes = size_gigabytes # update volume size while we're here
+    Action(data)
 end
 
-function removevolume!(client::AbstractClient; kwargs...)
-    postbody = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
-
-    if !haskey(postbody, "droplet_id")
-        error("'droplet_id' is a required argument")
-    end
-
-    if !haskey(postbody, "volume_name")
-        error("'volume_name' is a required argument")
-    end
-
-    postbody["type"] = "detach"
-
-    uri = joinpath(ENDPOINT, "volumes", "actions")
-    Action(postdata!(client, uri, postbody))
-end
-
-function resizevolume!(client::AbstractClient, volume_id::String; kwargs...)
-    postbody = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
-
-    if !haskey(postbody, "size_gigabytes")
-        error("'sizegigabytes' is a required argument")
-    end
-
-    postbody["type"] = "resize"
-
-    uri = joinpath(ENDPOINT, "volumes", volume_id, "actions")
-    Action(postdata!(client, uri, postbody))
-end
-
-function resizevolume!(client::AbstractClient, volume::Volume; kwargs...)
-    resizevolume!(client, volume.id; kwargs...)
-end
-
-function getallvolumeactions!(client::AbstractClient, volume_id::String)
-    uri = joinpath(ENDPOINT, "volumes", volume_id, "actions?per_page=$MAXOBJECTS")
-    data = getdata!(client, uri)
-    actions = Array{Action, 1}(UndefInitializer(), length(data))
-
-    for (i, action) in enumerate(data)
-        actions[i] = Action(action)
-    end
-
-    actions
+# List all actions for a volume
+function getallvolumeactions!(client::AbstractClient, volumeid::String)
+    uri = joinpath(ENDPOINT, "volumes", volumeid, "actions?per_page=$MAXOBJECTS")
+    getalldata!(client, uri, Action)
 end
 
 function getallvolumeactions!(client::AbstractClient, volume::Volume)
     getallvolumeactions!(client, volume.id)
 end
 
-function getvolumeaction!(client::AbstractClient, volume_id::String,
-                           action_id::Integer)
-    uri = joinpath(ENDPOINT, "volumes", volume_id, "actions",
-                   "$(action_id)")
+# Retrieve an existing volume action
+function getvolumeaction!(client::AbstractClient, volumeid::String, actionid::Integer)
+    uri = joinpath(ENDPOINT, "volumes", volumeid, "actions", "$(actionid)")
     Action(getdata!(client, uri))
 end
 
-function getvolumeaction!(client::AbstractClient, volume::Volume,
-                           action_id::Integer)
-    getvolumeaction!(client, volume.id, action_id)
+function getvolumeaction!(client::AbstractClient, volume::Volume, actionid::Integer)
+    getvolumeaction!(client, volume.id, actionid)
 end
 
-function getvolumeaction!(client::AbstractClient, volume_id::String,
-                           action::Action)
-    getvolumeaction!(client, volume_id, action.id)
+function getvolumeaction!(client::AbstractClient, volumeid::String, action::Action)
+    getvolumeaction!(client, volumeid, action.id)
 end
 
-function getvolumeaction!(client::AbstractClient, volume::Volume,
-                           action::Action)
+function getvolumeaction!(client::AbstractClient, volume::Volume, action::Action)
     getvolumeaction!(client, volume.id, action.id)
 end
