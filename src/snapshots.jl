@@ -28,8 +28,9 @@ function show(io::IO, s::Snapshot)
     print(io, "$(s.name)")
 end
 
-function deletesnapshot!(client::AbstractClient, snapshot_id::Integer)
-    uri = joinpath(ENDPOINT, "snapshots", "$(snapshot_id)")
+# Delete a (volume or droplet) snapshot
+function deletesnapshot!(client::AbstractClient, snapshotid::Integer)
+    uri = joinpath(ENDPOINT, "snapshots", "$(snapshotid)")
     deletedata!(client, uri)
 end
 

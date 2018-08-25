@@ -16,18 +16,13 @@ function show(io::IO, d::Domain)
     print(io, "Domain ($(d.name))")
 end
 
+# List all domains
 function getalldomains!(client::AbstractClient)
     uri = joinpath(ENDPOINT, "domains?per_page=$MAXOBJECTS")
-    data = getdata!(client, uri)
-    domains = Array{Domain, 1}(UndefInitializer(), length(data))
-
-    for (i, domain) in enumerate(data)
-        domains[i] = Domain(domain)
-    end
-
-    domains
+    getalldata!(client, uri, Domain)
 end
 
+# Retrieve an existing domain
 function getdomain!(client::AbstractClient, domain_name::String)
     uri = joinpath(ENDPOINT, "domains", domain_name)
     Domain(getdata!(client, uri))
@@ -37,21 +32,16 @@ function getdomain!(client::AbstractClient, domain::Domain)
     getdomain!(client, domain.name)
 end
 
-function createdomain!(client::AbstractClient; kwargs...)
-    postbody = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
-
-    if !haskey(postbody, "name")
-        error("'name' is a required argument")
-    end
-
-    if !haskey(postbody, "ip_address")
-        error("'ip_address' is a required argument")
-    end
+# Create a new domain
+function createdomain!(client::AbstractClient; name::String, ip_address::String, kwargs...)
+    postbody = Dict{String, Any}("name" => name, "ip_address" => ip_address)
+    merge!(postbody, Dict{String, Any}([String(k[1]) => k[2] for k in kwargs]))
 
     uri = joinpath(ENDPOINT, "domains")
     Domain(postdata!(client, uri, postbody))
 end
 
+# Delete a domain
 function deletedomain!(client::AbstractClient, domain_name::String)
     uri = joinpath(ENDPOINT, "domains", domain_name)
     deletedata!(client, uri)
