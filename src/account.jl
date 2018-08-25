@@ -24,6 +24,7 @@ function show(io::IO, a::Account)
     print(io, "Account ($(a.email))")
 end
 
+# Get user information
 function getaccount!(client::AbstractClient)
     uri = joinpath(ENDPOINT, "account")
     Account(getdata!(client, uri))
