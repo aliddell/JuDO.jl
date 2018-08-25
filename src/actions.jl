@@ -36,18 +36,13 @@ function show(io::IO, a::Action)
     print(io, "Action ($(a.actiontype), $(a.started_at))")
 end
 
+# List all actions
 function getallactions!(client::AbstractClient)
     uri = joinpath(ENDPOINT, "actions?per_page=$MAXOBJECTS")
-    data = getdata!(client, uri)
-    actions = Array{Action, 1}(UndefInitializer(), length(data))
-
-    for (i, action) in enumerate(data)
-        actions[i] = Action(action)
-    end
-
-    actions
+    getalldata!(client, uri, Action)
 end
 
+# Retrieve an existing action
 function getaction!(client::AbstractClient, action_id::Integer)
     uri = joinpath(ENDPOINT, "actions", "$(action_id)")
     Action(getdata!(client, uri))
