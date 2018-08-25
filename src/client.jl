@@ -56,6 +56,16 @@ function getdata!(client::Client, uri::String)
     payload
 end
 
+function getalldata!(client::AbstractClient, uri::String, datatype::DataType)
+    data = getdata!(client, uri)
+    collection = Array{datatype, 1}(UndefInitializer(), length(data))
+    for (i, obj) in enumerate(data)
+        collection[i] = datatype(obj)
+    end
+
+    collection
+end
+
 function postdata!(client::Client, uri::String, body::Dict{String})
     headers = Dict("Content-Type" => "application/json",
                    "Authorization" => "Bearer $(client.token)")
