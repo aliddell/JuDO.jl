@@ -172,7 +172,32 @@ function getalldropletkernels!(client::AbstractClient, droplet::Droplet)
     getalldropletkernels!(client, droplet.id)
 end
 
+# Create a new droplet
 function createdroplet!(client::AbstractClient; name::String, region::Union{Region, String},
+                        size::String, image::String, kwargs...)
+    if isa(region, Region)
+        region = region.slug
+    end
+    if isa(size, Size)
+        size = size.slug
+    end
+    if isa(image, Image)
+        if image.slug != nothing
+            image = image.slug
+        else
+            image = image.id
+        end
+    end
+
+    postbody = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
+    merge!(postbody, Dict{String, Any}("region" => region, "size" => size, "image" => image))
+
+    uri = joinpath(ENDPOINT, "droplets")
+    Droplet(postdata!(client, uri, postbody))
+end
+
+# Create multiple droplets
+function createdroplets!(client::AbstractClient; names::Array{String}, region::Union{Region, String},
                         size::String, image::String, kwargs...)
     if isa(region, Region)
         region = region.slug
