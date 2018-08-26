@@ -1,6 +1,6 @@
-struct Record
+mutable struct Record
     id::Integer
-    rtype::String
+    recordtype::String
     name::String
     data::String
     priority::Union{Nothing, Integer}
@@ -27,150 +27,105 @@ struct Record
 end
 
 function show(io::IO, r::Record)
-    print(io, "Record ($(r.rtype), $(r.name))")
+    print(io, "Record ($(r.recordtype), $(r.name))")
 end
 
-function getalldomainrecords!(client::AbstractClient, domain_name::String)
-    uri = joinpath(ENDPOINT, "domains", domain_name, "records")
-    response = getdata!(client, uri)
-
-    if floor(response.status/100) == 2 # OK
-        body = parse(String(response.body))
-        meta = body["meta"]
-        links = body["links"]
-        data = body["domain_records"]
-
-        records = Array{Record, 1}(UndefInitializer(), meta["total"])
-
-        for (i, record) in enumerate(data)
-            records[i] = Record(record)
-        end
-    else
-        error("Received error $(response.status)")
-    end
-
-    records
+# List all domain records
+function getalldomainrecords!(client::AbstractClient, domainname::String)
+    uri = joinpath(ENDPOINT, "domains", domainname, "records")
+    getalldata!(client, uri, Record)
 end
 
 function getalldomainrecords!(client::AbstractClient, domain::Domain)
     getalldomainrecords!(client, domain.name)
 end
 
-function getdomainrecord!(client::AbstractClient, domain_name::String,
-                           record_id::Integer)
-    response = getdata!(client, joinpath(ENDPOINT, "domains", domain_name,
-                        "records", "$record_id"))
-
-    if floor(response.status/100) == 2 # OK
-        body = parse(String(response.body))
-        data = body["domain_record"]
-
-        record = Record(data)
-    else
-        error("Received error $(response.status)")
-    end
+# Retrieve an existing domain record
+function getdomainrecord!(client::AbstractClient, domainname::String, record_id::Integer)
+    uri = joinpath(ENDPOINT, "domains", domainname, "records", "$record_id")
+    Record(getdata!(client, uri))
 end
 
-function createdomainrecord!(client::AbstractClient, domain_name::String,
-                              record_type::String; kwargs...)
-    postbody = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
-
-    postbody["type"] = record_type
-
-    if record_type in ("A", "AAAA", "CAA", "CNAME", "MX", "TXT", "SRV", "NS")
-        if !(record_type in ("MX", "NS") || haskey(postbody, "name"))
-            error("'name' is a required argument for type '$(record_type)'")
-        end
-
-        if !haskey(postbody, "data")
-            error("'data' is a required argument for type '$(record_type)'")
-        end
-    end
-
-    if record_type in ("SRV", "MX") && !haskey(postbody, "priority")
-        error("'priority' is a required argument for type '$(record_type)'")
-    end
-
-    if record_type == "SRV"
-        if !haskey("postbody", "port")
-            error("'port' is a required argument for type '$(record_type)'")
-        end
-
-        if !haskey(postbody, "weight")
-            error("'weight' is a required argument for type '$(record_type)'")
-        end
-    end
-
-    if record_type == "CAA"
-        if !haskey(postbody, "flags")
-            error("'flags' is a required argument for type '$(record_type)'")
-        end
-
-        if !haskey(postbody, "tag")
-            error("'tag' is a required argument for type '$(record_type)'")
-        end
-    end
-
-    if !haskey(postbody, "ttl")
-        error("'ttl' is a required argument")
-    end
-
-    uri = joinpath(ENDPOINT, "domains", domain_name, "records")
-    body = postdata!(client, uri, postbody)
-
-    data = body["domain_record"]
-    record = Record(data)
-end
-
-function createdomainrecord!(client::AbstractClient, domain::Domain; kwargs...)
-    createdomainrecord!(client, domain.name; kwargs...)
-end
-
-function getdomainrecord!(client::AbstractClient, domain::Domain,
-                           record_id::Integer)
+function getdomainrecord!(client::AbstractClient, domain::Domain, record_id::Integer)
     getdomainrecord!(client, domain.name, record_id)
 end
 
-function getdomainrecord!(client::AbstractClient, domain_name::String,
-                           record::Record)
-    getdomainrecord!(client, domain_name, record.id)
-end
+# Create a new domain record
+function createdomainrecord!(client::AbstractClient, domainname::String,
+                             recordtype::String; kwargs...)
+    postbody = Dict{String, Any}("type" => recordtype)
+    merge!(postbody, Dict{String, Any}([String(k[1]) => k[2] for k in kwargs]))
 
-function getdomainrecord!(client::AbstractClient, domain::Domain,
-                           record::Record)
-    getdomainrecord!(client, domain.name, record.id)
-end
-
-function update_domain_record(client::AbstractClient, domain_name::String,
-                              record_id::Integer; kwargs...)
-    putbody = Dict([String(k[1]) => k[2] for k in kwargs])
-
-    uri = joinpath(ENDPOINT, "domains", domain_name, "records", "$(record_id)")
-    response = putdata!(client, uri, body)
-
-    if floor(response.status/100) == 2 # OK
-        body = parse(String(response.body))
-        data = body["domain_record"]
-
-        record = Record(data)
-    else
-        error("Received error $(response.status)")
+    if recordtype in ("A", "AAAA", "CAA", "CNAME", "MX", "TXT", "SRV", "NS")
+        if !(recordtype in ("MX", "NS") || haskey(postbody, "name"))
+            error("'name' is a required argument for type '$(recordtype)'")
+        end
+        if !haskey(postbody, "data")
+            error("'data' is a required argument for type '$(recordtype)'")
+        end
     end
+    if recordtype in ("SRV", "MX") && !haskey(postbody, "priority")
+        error("'priority' is a required argument for type '$(recordtype)'")
+    end
+    if recordtype == "SRV"
+        if !haskey("postbody", "port")
+            error("'port' is a required argument for type '$(recordtype)'")
+        end
+        if !haskey(postbody, "weight")
+            error("'weight' is a required argument for type '$(recordtype)'")
+        end
+    end
+    if recordtype == "CAA"
+        if !haskey(postbody, "flags")
+            error("'flags' is a required argument for type '$(recordtype)'")
+        end
+        if !haskey(postbody, "tag")
+            error("'tag' is a required argument for type '$(recordtype)'")
+        end
+    end
+
+    uri = joinpath(ENDPOINT, "domains", domainname, "records")
+    Record(postdata!(client, uri, postbody))
 end
 
-function update_domain_record(client::AbstractClient, domain::Domain, record_id::Integer; kwargs...)
-    update_domain_record(client, domain.name, record_id; kwargs...)
+function createdomainrecord!(client::AbstractClient, domain::Domain,
+                             recordtype::String; kwargs...)
+    createdomainrecord!(client, domain.name, recordtype; kwargs...)
 end
 
-function update_domain_record(client::AbstractClient, domain_name::String, record::Record; kwargs...)
-    update_domain_record(client, domain_name, record.id; kwargs...)
+# Update a Domain Record
+function updatedomainrecord!(client::AbstractClient, domainname::String,
+                             record_id::Integer; kwargs...)
+    putbody = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
+
+    uri = joinpath(ENDPOINT, "domains", domainname, "records", "$(record_id)")
+    Record(putdata!(client, uri, putbody))
 end
 
-function update_domain_record(client::AbstractClient, domain::Domain, record::Record; kwargs...)
-    update_domain_record(client, domain.name, record.id; kwargs...)
+function updatedomainrecord!(client::AbstractClient, domain::Domain, record_id::Integer; kwargs...)
+    updatedomainrecord!(client, domain.name, record_id; kwargs...)
 end
 
-function deletedomainrecord!(client::AbstractClient, domain_name::String, record_id::Integer)
-    uri = joinpath(ENDPOINT, "domains", domain_name, "records", "$(record_id)")
+function updatedomainrecord!(client::AbstractClient, domainname::String, record::Record; kwargs...)
+    data = updatedomainrecord!(client, domainname, record.id; kwargs...)
+    for k in kwargs
+        if k[1] in fieldnames(Domain)
+            setfield!(record, Symbol(k[1]), k[2])
+        end
+    end
+    data
+end
+
+function updatedomainrecord!(client::AbstractClient, domain::Domain, record::Record; kwargs...)
+    updatedomainrecord!(client, domain.name, record; kwargs...)
+end
+
+# Delete a Domain Record
+function deletedomainrecord!(client::AbstractClient, domainname::String, record_id::Integer)
+    uri = joinpath(ENDPOINT, "domains", domainname, "records", "$(record_id)")
     deletedata!(client, uri)
+end
+
+function deletedomainrecord!(client::AbstractClient, domainname::String, record::Record)
+    deletedomainrecord!(client, domainname, record.id)
 end

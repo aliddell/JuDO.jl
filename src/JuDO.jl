@@ -12,6 +12,8 @@ export Action, getallactions!, getaction!
 export Certificate, getallcertificates!, getcertificate!, createcertificate!,
        deletecertificate!
 export Domain, getalldomains!, createdomain!, getdomain!, deletedomain!
+export Record, getalldomainrecords!, getdomainrecord!, createdomainrecord!,
+       updatedomainrecord!, deletedomainrecord!
 export Volume, getallvolumes!, createvolume!, getvolume!,
        getallvolumesnapshots!, snapshotvolume!, deletevolume!,
        attachvolume!, removevolume!, resizevolume!, getallvolumeactions!,

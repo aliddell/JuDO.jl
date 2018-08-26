@@ -48,7 +48,7 @@ function postdata!(client::TestClient, uri::String, body::Dict{String})
 end
 
 function putdata!(client::TestClient, uri::String, body::Dict{String})
-    path = joinpath(DATADIR, uri, "put.json")
+    path = joinpath(DATADIR, replace(uri, ENDPOINT => ""), "put.json")
     data = open(path, "r") do io
         parse(read(io, String))
     end
@@ -71,6 +71,8 @@ include("testactions.jl")
 include("testcertificates.jl")
 # domain tests
 include("testdomains.jl")
+# domain record tests
+include("testrecords.jl")
 # volume tests
 include("testvolumes.jl")
 
