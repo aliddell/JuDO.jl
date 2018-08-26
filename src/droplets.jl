@@ -134,10 +134,10 @@ function show(io::IO, d::Droplet)
     print(io, "Droplet ($(d.name))")
 end
 
-struct DropletSnapshot
+struct DropletBackup
     id::Integer
     name::String
-    snapshottype::String
+    backuptype::String
     distribution::String
     slug::Union{Nothing, String}
     public::Bool
@@ -145,7 +145,7 @@ struct DropletSnapshot
     mindisksize::Integer
     created_at::DateTime
 
-    function DropletSnapshot(data::Dict{String})
+    function DropletBackup(data::Dict{String})
         data["created_at"] = DateTime(data["created_at"][1:end-1])
 
         new(
@@ -162,8 +162,12 @@ struct DropletSnapshot
     end
 end
 
-function show(io::IO, d::DropletSnapshot)
-    print(io, "Snapshot ($(d.name))")
+function show(io::IO, d::DropletBackup)
+    if d.backuptype == "snapshot"
+        print(io, "Snapshot ($(d.name))")
+    else
+        print(io, "Backup ($(d.name))")
+    end
 end
 
 # List all droplets
@@ -249,11 +253,21 @@ end
 # List snapshots for a droplet
 function getalldropletsnapshots!(client::AbstractClient, dropletid::Integer)
     uri = joinpath(ENDPOINT, "droplets", "$dropletid", "snapshots?per_page=$MAXOBJECTS")
-    getalldata!(client, uri, DropletSnapshot)
+    getalldata!(client, uri, DropletBackup)
 end
 
 function getalldropletsnapshots!(client::AbstractClient, droplet::Droplet)
     getalldropletsnapshots!(client, droplet.id)
+end
+
+# List snapshots for a droplet
+function getalldropletbackups!(client::AbstractClient, dropletid::Integer)
+    uri = joinpath(ENDPOINT, "droplets", "$dropletid", "backups?per_page=$MAXOBJECTS")
+    getalldata!(client, uri, DropletBackup)
+end
+
+function getalldropletbackups!(client::AbstractClient, droplet::Droplet)
+    getalldropletbackups!(client, droplet.id)
 end
 
 function deletedroplet!(client::AbstractClient, droplet_id::Integer)

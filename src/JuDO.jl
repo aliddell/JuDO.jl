@@ -19,7 +19,8 @@ export Domain, getalldomains!, createdomain!, getdomain!, deletedomain!
 export Record, getalldomainrecords!, getdomainrecord!, createdomainrecord!,
        updatedomainrecord!, deletedomainrecord!
 export Droplet, getalldroplets!, getdropletsbytag!, getdroplet!, createdroplet!,
-       createdroplets!, getalldropletkernels!, getalldropletsnapshots!
+       createdroplets!, getalldropletkernels!, getalldropletsnapshots!,
+       getalldropletbackups!
 
 include("client.jl")
 include("regions.jl")

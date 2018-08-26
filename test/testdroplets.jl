@@ -88,6 +88,19 @@ snapshots = getalldropletsnapshots!(client, droplet)
     @test snapshots[1].distribution == "Ubuntu"
     @test snapshots[1].slug == nothing
     @test snapshots[1].mindisksize == 20
-    @test snapshots[1].snapshottype == "snapshot"
+    @test snapshots[1].backuptype == "snapshot"
     @test snapshots[1].regions == ["nyc3", "nyc3"]
+end;
+
+backups = getalldropletbackups!(client, droplet)
+@testset "List backups for a Droplet" begin
+    @test backups[1].public == false
+    @test backups[1].name == "example.com 2014-11-14"
+    @test backups[1].created_at == DateTime("2014-11-14T16:07:38")
+    @test backups[1].id == 7622989
+    @test backups[1].distribution == "Ubuntu"
+    @test backups[1].slug == nothing
+    @test backups[1].mindisksize == 20
+    @test backups[1].backuptype == "snapshot"
+    @test backups[1].regions == ["nyc3"]
 end;
