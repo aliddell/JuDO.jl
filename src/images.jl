@@ -1,12 +1,12 @@
 struct Image
     id::Integer
     name::String
-    itype::String
+    imagetype::String
     distribution::String
     slug::Union{Nothing, String}
     public::Bool
     regions::Array{String, 1}
-    min_disk_size::Integer
+    mindisksize::Integer
     sizegigabytes::Real
     created_at::DateTime
 

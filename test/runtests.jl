@@ -67,14 +67,16 @@ testclient = TestClient("fake token")
 include("testaccount.jl")
 # action tests
 include("testactions.jl")
+# block storage tests
+include("testvolumes.jl")
 # certificate tests
 include("testcertificates.jl")
 # domain tests
 include("testdomains.jl")
 # domain record tests
 include("testrecords.jl")
-# volume tests
-include("testvolumes.jl")
+# droplet tests
+include("testdroplets.jl")
 
 # real client test
 if haskey(ENV, "DOTOKEN")

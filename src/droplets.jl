@@ -1,14 +1,14 @@
 struct Network
     gateway::String
     ipaddress::String
-    netmask::String
+    netmask::Union{String, Integer}  # ipv6 netmasks are integers
     networktype::String
 
     function Network(data::Dict{String})
         new(
             data["gateway"],
             data["ip_address"],
-            "$(data["netmask"])", # ipv6 netmasks are integers
+            data["netmask"],
             data["type"]
         )
     end
@@ -50,7 +50,7 @@ struct Droplet
     features::Array{String, 1}
     region::Region
     image::Image
-    size::Size
+    size::Union{Nothing, Size}
     sizeslug::String
     networks::Dict{String, Array{Network, 1}}
     kernel::Union{Nothing, Kernel}
@@ -64,7 +64,11 @@ struct Droplet
 
         data["region"] = Region(data["region"])
         data["image"] = Image(data["image"])
-        data["size"] = Size(data["size"])
+        if isempty(data["size"])
+            data["size"] = nothing
+        else
+            data["size"] = Size(data["size"])
+        end
 
         if haskey(data["networks"], "v4")
             networks = Array{Network, 1}(UndefInitializer(), length(data["networks"]["v4"]))
@@ -80,17 +84,17 @@ struct Droplet
             end
             data["networks"]["v6"] = networks
         end
-
         if data["kernel"] != nothing
             data["kernel"] = Kernel(data["kernel"])
         end
-
+        if !haskey(data, "next_backup_window")
+            data["next_backup_window"] = nothing
+        end
         if data["next_backup_window"] != nothing
             # we assume all DO datetimes are in UTC
             bst  = DateTime(data["next_backup_window"]["start"][1:end-1])
             bend = DateTime(data["next_backup_window"]["end"][1:end-1])
-            data["next_backup_window"] = Dict("start" => bst,
-                                              "end" => bend)
+            data["next_backup_window"] = Dict("start" => bst, "end" => bend)
         end
 
         new(
@@ -122,18 +126,13 @@ function show(io::IO, d::Droplet)
     print(io, "Droplet ($(d.name))")
 end
 
+# List all droplets
 function getalldroplets!(client::AbstractClient)
     uri = joinpath(ENDPOINT, "droplets")
-    data = getdata!(client, uri)
-    droplets = Array{Droplet, 1}(UndefInitializer(), length(data))
-
-    for (i, droplet) in enumerate(data)
-        droplets[i] = Droplet(droplet)
-    end
-
-    droplets
+    getalldata!(client, uri, Droplet)
 end
 
+# Retrieve an existing droplet by ID
 function getdroplet!(client::AbstractClient, droplet_id::Integer)
     uri = joinpath(ENDPOINT, "droplets", "$(droplet_id)")
     Droplet(getdata!(client, uri))

@@ -2,7 +2,7 @@ struct Region
     slug::String
     name::String
     sizes::Array{String, 1}
-    available::Bool
+    available::Union{Nothing, Bool}
     features::Array{String, 1}
 
     function Region(data::Dict{String})
