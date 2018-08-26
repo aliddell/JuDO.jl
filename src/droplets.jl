@@ -48,8 +48,8 @@ struct Droplet
     backupids::Array{Integer, 1}
     snapshotids::Array{Integer, 1}
     features::Array{String, 1}
-    region::Region
-    image::Image
+    region::Union{Nothing, Region}
+    image::Union{Nothing, Image}
     size::Union{Nothing, Size}
     sizeslug::String
     networks::Dict{String, Array{Network, 1}}
@@ -62,8 +62,16 @@ struct Droplet
         # we assume all DO datetimes are in UTC
         data["created_at"] = DateTime(data["created_at"][1:end-1])
 
-        data["region"] = Region(data["region"])
-        data["image"] = Image(data["image"])
+        if isempty(data["region"])
+            data["region"] = nothing
+        else
+            data["region"] = Region(data["region"])
+        end
+        if isempty(data["image"])
+            data["image"] = nothing
+        else
+            data["image"] = Image(data["image"])
+        end
         if isempty(data["size"])
             data["size"] = nothing
         else
@@ -142,16 +150,10 @@ function getdroplet!(client::AbstractClient, droplet::Droplet)
     getdroplet!(client, droplet.id)
 end
 
+# List droplets by tag
 function getdropletsbytag!(client::AbstractClient, tag::String)
     uri = joinpath(ENDPOINT, "droplets?tag_name=$(tag)&per_page=$MAXOBJECTS")
-    data = getdata!(client, uri)
-    droplets = Array{Droplet, 1}(UndefInitializer(), length(data))
-
-    for (i, droplet) in enumerate(data)
-        droplets[i] = Droplet(droplet)
-    end
-
-    droplets
+    getalldata!(client, uri, Droplet)
 end
 
 function getalldropletkernels!(client::AbstractClient, droplet_id::Integer)
@@ -170,34 +172,24 @@ function getalldropletkernels!(client::AbstractClient, droplet::Droplet)
     getalldropletkernels!(client, droplet.id)
 end
 
-function createdroplet!(client::AbstractClient; kwargs...)
-    postbody = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
-
-    if !haskey(postbody, "name")
-        error("'name' is a required argument")
+function createdroplet!(client::AbstractClient; name::String, region::Union{Region, String},
+                        size::String, image::String, kwargs...)
+    if isa(region, Region)
+        region = region.slug
     end
-
-    if !haskey(postbody, "region")
-        error("'region' is a required argument")
-    elseif postbody["region"] isa Region
-        postbody["region"] = postbody["region"].slug
+    if isa(size, Size)
+        size = size.slug
     end
-
-    if !haskey(postbody, "size")
-        error("'size' is a required argument")
-    elseif postbody["size"] isa Size
-        postbody["size"] = postbody["size"].slug
-    end
-
-    if !haskey(postbody, "image")
-        error("'image' is a required argument")
-    elseif postbody["image"] isa Image
-        if postbody["image"].slug.hasvalue
-            postbody["image"] = postbody["image"].slug
+    if isa(image, Image)
+        if image.slug != nothing
+            image = image.slug
         else
-            postbody["image"] = postbody["image"].id
+            image = image.id
         end
     end
+
+    postbody = Dict{String, Any}([String(k[1]) => k[2] for k in kwargs])
+    merge!(postbody, Dict{String, Any}("region" => region, "size" => size, "image" => image))
 
     uri = joinpath(ENDPOINT, "droplets")
     Droplet(postdata!(client, uri, postbody))

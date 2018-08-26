@@ -43,3 +43,30 @@ droplets = getalldroplets!(testclient)
     @test droplets[1].kernel.version == "3.13.0-37-generic"
     @test isempty(droplets[1].tags)
 end;
+
+droplet = createdroplet!(testclient; name="example.com", region="nyc3",
+                         size="s-1vcpu-1gb", image="ubuntu-16-04-x64",
+                         backups=false, ipv6=true, tags=["web"])
+@testset "Create a new Droplet" begin
+    @test droplet.locked == true
+    @test isempty(droplet.snapshotids)
+    @test droplet.created_at == DateTime("2014-11-14T16:36:31")
+    @test droplet.memory == 1024
+    @test droplet.vcpus == 1
+    @test droplet.name == "example.com"
+    @test droplet.status == "new"
+    @test isempty(droplet.networks)
+    @test droplet.id == 3164494
+    @test droplet.disk == 25
+    @test isempty(droplet.backupids)
+    @test droplet.sizeslug == "s-1vcpu-1gb"
+    @test droplet.image == nothing
+    @test droplet.size == nothing
+    @test droplet.region == nothing
+    @test isempty(droplet.volumeids)
+    @test droplet.features == ["virtio"]
+    @test droplet.kernel.name == "Ubuntu 14.04 x64 vmlinuz-3.13.0-37-generic"
+    @test droplet.kernel.id == 2233
+    @test droplet.kernel.version == "3.13.0-37-generic"
+    @test droplet.tags == ["web"]
+end;
