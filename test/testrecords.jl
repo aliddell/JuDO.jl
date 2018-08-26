@@ -13,7 +13,7 @@ records = getalldomainrecords!(testclient, domain)
     @test records[1].weight == nothing
     @test records[1].flags == nothing
     @test records[1].tag == nothing
-end
+end;
 
 record = createdomainrecord!(testclient, domain, "A"; name="www", data="162.10.66.0",
                              ttl=1800)
@@ -28,7 +28,7 @@ record = createdomainrecord!(testclient, domain, "A"; name="www", data="162.10.6
     @test record.weight == nothing
     @test record.flags == nothing
     @test record.tag == nothing
-end
+end;
 
 record = getdomainrecord!(testclient, "example.com", 28448433)
 @testset "Retrieve an existing Domain Record" begin
@@ -42,7 +42,7 @@ record = getdomainrecord!(testclient, "example.com", 28448433)
     @test record.weight == nothing
     @test record.flags == nothing
     @test record.tag == nothing
-end
+end;
 
 record = updatedomainrecord!(testclient, "example.com", record, name="blog")
 @testset "Update a Domain Record" begin
@@ -56,7 +56,7 @@ record = updatedomainrecord!(testclient, "example.com", record, name="blog")
     @test record.weight == nothing
     @test record.flags == nothing
     @test record.tag == nothing
-end
+end;
 
 @testset "Delete a Domain Record" begin
     @test deletedomainrecord!(testclient, "example.com", record)
