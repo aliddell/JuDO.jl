@@ -1,4 +1,4 @@
-droplets = getalldroplets!(testclient)
+droplets = getalldroplets!(client)
 @testset "List all Droplets" begin
     @test length(droplets) == 1
     @test droplets[1].locked == false
@@ -44,7 +44,7 @@ droplets = getalldroplets!(testclient)
     @test isempty(droplets[1].tags)
 end;
 
-droplet = createdroplet!(testclient; name="example.com", region="nyc3",
+droplet = createdroplet!(client; name="example.com", region="nyc3",
                          size="s-1vcpu-1gb", image="ubuntu-16-04-x64",
                          backups=false, ipv6=true, tags=["web"])
 @testset "Create a new Droplet" begin
@@ -71,10 +71,23 @@ droplet = createdroplet!(testclient; name="example.com", region="nyc3",
     @test droplet.tags == ["web"]
 end;
 
-kernels = getalldropletkernels!(testclient, droplet)
+kernels = getalldropletkernels!(client, droplet)
 @testset "List all available Kernels for a Droplet" begin
     @test length(kernels) == 1
     @test kernels[1].name == "DO-recovery-static-fsck"
     @test kernels[1].id == 231
     @test kernels[1].version == "3.8.0-25-generic"
+end;
+
+snapshots = getalldropletsnapshots!(client, droplet)
+@testset "List snapshots for a Droplet" begin
+    @test snapshots[1].public == false
+    @test snapshots[1].name == "nginx-fresh"
+    @test snapshots[1].created_at == DateTime("2014-11-14T16:37:34")
+    @test snapshots[1].id == 7938206
+    @test snapshots[1].distribution == "Ubuntu"
+    @test snapshots[1].slug == nothing
+    @test snapshots[1].mindisksize == 20
+    @test snapshots[1].snapshottype == "snapshot"
+    @test snapshots[1].regions == ["nyc3", "nyc3"]
 end;

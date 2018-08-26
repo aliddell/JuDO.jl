@@ -134,6 +134,38 @@ function show(io::IO, d::Droplet)
     print(io, "Droplet ($(d.name))")
 end
 
+struct DropletSnapshot
+    id::Integer
+    name::String
+    snapshottype::String
+    distribution::String
+    slug::Union{Nothing, String}
+    public::Bool
+    regions::Array{String, 1}
+    mindisksize::Integer
+    created_at::DateTime
+
+    function DropletSnapshot(data::Dict{String})
+        data["created_at"] = DateTime(data["created_at"][1:end-1])
+
+        new(
+            data["id"],
+            data["name"],
+            data["type"],
+            data["distribution"],
+            data["slug"],
+            data["public"],
+            data["regions"],
+            data["min_disk_size"],
+            data["created_at"]
+        )
+    end
+end
+
+function show(io::IO, d::DropletSnapshot)
+    print(io, "Snapshot ($(d.name))")
+end
+
 # List all droplets
 function getalldroplets!(client::AbstractClient)
     uri = joinpath(ENDPOINT, "droplets?per_page=$MAXOBJECTS")
@@ -212,6 +244,16 @@ function createdroplets!(client::AbstractClient; names::Array{String}, region::U
 
     uri = joinpath(ENDPOINT, "droplets")
     Droplet(postdata!(client, uri, postbody))
+end
+
+# List snapshots for a droplet
+function getalldropletsnapshots!(client::AbstractClient, dropletid::Integer)
+    uri = joinpath(ENDPOINT, "droplets", "$dropletid", "snapshots?per_page=$MAXOBJECTS")
+    getalldata!(client, uri, DropletSnapshot)
+end
+
+function getalldropletsnapshots!(client::AbstractClient, droplet::Droplet)
+    getalldropletsnapshots!(client, droplet.id)
 end
 
 function deletedroplet!(client::AbstractClient, droplet_id::Integer)

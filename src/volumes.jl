@@ -29,6 +29,36 @@ function show(io::IO, v::Volume)
     print(io, "Volume ($(v.name))")
 end
 
+struct VolumeSnapshot
+    id::String
+    name::String
+    created_at::DateTime
+    regions::Array{String, 1}
+    resourceid::String
+    resourcetype::String
+    mindisksize::Real
+    sizegigabytes::Real
+
+    function VolumeSnapshot(data::Dict{String})
+        data["created_at"] = DateTime(data["created_at"][1:end-1])
+
+        new(
+            data["id"],
+            data["name"],
+            data["created_at"],
+            data["regions"],
+            data["resource_id"],
+            data["resource_type"],
+            data["min_disk_size"],
+            data["size_gigabytes"]
+        )
+    end
+end
+
+function show(io::IO, s::VolumeSnapshot)
+    print(io, "$(s.name)")
+end
+
 # List all volumes
 function getallvolumes!(client::AbstractClient; kwargs...)
     # check if a request for all volumes in a region
@@ -81,7 +111,7 @@ end
 # List snapshots for a volume
 function getallvolumesnapshots!(client::AbstractClient, volumeid::String)
     uri = joinpath(ENDPOINT, "volumes", volumeid, "snapshots?per_page=$MAXOBJECTS")
-    getalldata!(client, uri, Snapshot)
+    getalldata!(client, uri, VolumeSnapshot)
 end
 
 function getallvolumesnapshots!(client::AbstractClient, volume::Volume)
@@ -94,7 +124,7 @@ function snapshotvolume!(client::AbstractClient, volumeid::String; name::String,
     merge!(postbody, Dict{String, Any}([String(k[1]) => k[2] for k in kwargs]))
 
     uri = joinpath(ENDPOINT, "volumes", volumeid, "snapshots")
-    Snapshot(postdata!(client, uri, postbody))
+    VolumeSnapshot(postdata!(client, uri, postbody))
 end
 
 # Delete a volume
@@ -111,6 +141,16 @@ end
 function deletevolume!(client::AbstractClient; name::String, region::String)
     uri = joinpath(ENDPOINT, "volumes?name=$(name)&region=$(region)")
     deletedata!(client, uri)
+end
+
+# Delete a volume snapshot
+function deletevolumesnapshot!(client::AbstractClient, snapshotid::Integer)
+    uri = joinpath(ENDPOINT, "snapshots", "$(snapshotid)")
+    deletedata!(client, uri)
+end
+
+function deletevolumesnapshot!(client::AbstractClient, snapshot::VolumeSnapshot)
+    deletedata!(client, snapshot.id)
 end
 
 # Attach a volume to a droplet

@@ -1,4 +1,4 @@
-account = getaccount!(testclient)
+account = getaccount!(client)
 
 @testset "Get User Information" begin
     @test account.email == "sammy@digitalocean.com"

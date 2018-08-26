@@ -1,6 +1,6 @@
 domain = "example.com"
 
-records = getalldomainrecords!(testclient, domain)
+records = getalldomainrecords!(client, domain)
 @testset "List all Domain Records" begin
     @test length(records) == 4
     @test records[1].id == 28448429
@@ -15,7 +15,7 @@ records = getalldomainrecords!(testclient, domain)
     @test records[1].tag == nothing
 end;
 
-record = createdomainrecord!(testclient, domain, "A"; name="www", data="162.10.66.0",
+record = createdomainrecord!(client, domain, "A"; name="www", data="162.10.66.0",
                              ttl=1800)
 @testset "Create a new Domain Record" begin
     @test record.id == 28448433
@@ -30,7 +30,7 @@ record = createdomainrecord!(testclient, domain, "A"; name="www", data="162.10.6
     @test record.tag == nothing
 end;
 
-record = getdomainrecord!(testclient, "example.com", 28448433)
+record = getdomainrecord!(client, "example.com", 28448433)
 @testset "Retrieve an existing Domain Record" begin
     @test record.id == 28448433
     @test record.recordtype == "A"
@@ -44,7 +44,7 @@ record = getdomainrecord!(testclient, "example.com", 28448433)
     @test record.tag == nothing
 end;
 
-record = updatedomainrecord!(testclient, "example.com", record, name="blog")
+record = updatedomainrecord!(client, "example.com", record, name="blog")
 @testset "Update a Domain Record" begin
     @test record.id == 28448433
     @test record.recordtype == "A"
@@ -59,5 +59,5 @@ record = updatedomainrecord!(testclient, "example.com", record, name="blog")
 end;
 
 @testset "Delete a Domain Record" begin
-    @test deletedomainrecord!(testclient, "example.com", record)
+    @test deletedomainrecord!(client, "example.com", record)
 end;

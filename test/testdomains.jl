@@ -1,4 +1,4 @@
-domains = getalldomains!(testclient)
+domains = getalldomains!(client)
 
 @testset "List all Domains" begin
     @test length(domains) == 1
@@ -7,7 +7,7 @@ domains = getalldomains!(testclient)
     @test occursin("IN SOA ns1.digitalocean.com.", domains[1].zonefile)
 end;
 
-domain = getdomain!(testclient, "example.com")
+domain = getdomain!(client, "example.com")
 
 @testset "Retrieve an existing Domain" begin
     @test domain.name == "example.com"
@@ -15,7 +15,7 @@ domain = getdomain!(testclient, "example.com")
     @test occursin("IN SOA ns1.digitalocean.com.", domain.zonefile)
 end;
 
-domain = createdomain!(testclient; name="example.com", ip_address="1.2.3.4")
+domain = createdomain!(client; name="example.com", ip_address="1.2.3.4")
 
 @testset "Create a new Domain" begin
     @test domain.name == "example.com"
@@ -24,5 +24,5 @@ domain = createdomain!(testclient; name="example.com", ip_address="1.2.3.4")
 end;
 
 @testset "Delete a Domain" begin
-    @test deletedomain!(testclient, domain)
+    @test deletedomain!(client, domain)
 end;

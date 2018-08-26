@@ -1,4 +1,4 @@
-actions = getallactions!(testclient)
+actions = getallactions!(client)
 
 @testset "List all Actions" begin
     @test actions[1].id == 36804636
@@ -14,7 +14,7 @@ actions = getallactions!(testclient)
     @test "private_networking" in actions[1].region.features
 end;
 
-action = getaction!(testclient, 36804636)
+action = getaction!(client, 36804636)
 
 @testset "Retrieve an existing Action" begin
     @test action.id == 36804636

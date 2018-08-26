@@ -9,17 +9,17 @@ export AbstractClient, Client
 
 export Account, getaccount!
 export Action, getallactions!, getaction!
-export Volume, getallvolumes!, createvolume!, getvolume!,
+export Volume, VolumeSnapshot, getallvolumes!, createvolume!, getvolume!,
        getallvolumesnapshots!, snapshotvolume!, deletevolume!,
        attachvolume!, removevolume!, resizevolume!, getallvolumeactions!,
-       getvolumeaction!
+       getvolumeaction!, deletevolumesnapshot!
 export Certificate, getallcertificates!, getcertificate!, createcertificate!,
        deletecertificate!
 export Domain, getalldomains!, createdomain!, getdomain!, deletedomain!
 export Record, getalldomainrecords!, getdomainrecord!, createdomainrecord!,
        updatedomainrecord!, deletedomainrecord!
 export Droplet, getalldroplets!, getdropletsbytag!, getdroplet!, createdroplet!,
-       createdroplets!, getalldropletkernels!
+       createdroplets!, getalldropletkernels!, getalldropletsnapshots!
 
 include("client.jl")
 include("regions.jl")
@@ -31,7 +31,6 @@ include("domains.jl")
 include("images.jl")
 include("records.jl")
 include("sizes.jl")
-include("snapshots.jl")
 include("ssh_keys.jl")
 include("volumes.jl")
 
