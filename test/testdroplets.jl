@@ -104,3 +104,7 @@ backups = getalldropletbackups!(client, droplet)
     @test backups[1].backuptype == "snapshot"
     @test backups[1].regions == ["nyc3"]
 end;
+
+@testset "Delete a Droplet" begin
+    @test deletedroplet!(client, droplet)
+end;

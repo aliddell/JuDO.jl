@@ -270,11 +270,20 @@ function getalldropletbackups!(client::AbstractClient, droplet::Droplet)
     getalldropletbackups!(client, droplet.id)
 end
 
-function deletedroplet!(client::AbstractClient, droplet_id::Integer)
-    uri = joinpath(ENDPOINT, "droplets", "$(droplet_id)")
+# Delete a droplet
+function deletedroplet!(client::AbstractClient, dropletid::Integer)
+    uri = joinpath(ENDPOINT, "droplets", "$(dropletid)")
     deletedata!(client, uri)
 end
 
 function deletedroplet!(client::AbstractClient, droplet::Droplet)
     deletedroplet!(client, droplet.id)
 end
+
+# Delete droplets by tag
+function deletedroplet!(client::AbstractClient, tag::String)
+    uri = joinpath(ENDPOINT, "droplets?tag_name=$(tag)")
+    deletedata!(client, uri)
+end
+
+# List neighbors for a droplet
