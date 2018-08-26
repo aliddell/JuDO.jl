@@ -18,7 +18,8 @@ export Certificate, getallcertificates!, getcertificate!, createcertificate!,
 export Domain, getalldomains!, createdomain!, getdomain!, deletedomain!
 export Record, getalldomainrecords!, getdomainrecord!, createdomainrecord!,
        updatedomainrecord!, deletedomainrecord!
-export Droplet, getalldroplets!, createdroplet!
+export Droplet, getalldroplets!, getdropletsbytag!, getdroplet!, createdroplet!,
+       createdroplets!, getalldropletkernels!
 
 include("client.jl")
 include("regions.jl")

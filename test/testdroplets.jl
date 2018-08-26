@@ -70,3 +70,11 @@ droplet = createdroplet!(testclient; name="example.com", region="nyc3",
     @test droplet.kernel.version == "3.13.0-37-generic"
     @test droplet.tags == ["web"]
 end;
+
+kernels = getalldropletkernels!(testclient, droplet)
+@testset "List all available Kernels for a Droplet" begin
+    @test length(kernels) == 1
+    @test kernels[1].name == "DO-recovery-static-fsck"
+    @test kernels[1].id == 231
+    @test kernels[1].version == "3.8.0-25-generic"
+end;

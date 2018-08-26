@@ -136,7 +136,13 @@ end
 
 # List all droplets
 function getalldroplets!(client::AbstractClient)
-    uri = joinpath(ENDPOINT, "droplets")
+    uri = joinpath(ENDPOINT, "droplets?per_page=$MAXOBJECTS")
+    getalldata!(client, uri, Droplet)
+end
+
+# List droplets by tag
+function getdropletsbytag!(client::AbstractClient; tag::String)
+    uri = joinpath(ENDPOINT, "droplets?tag_name=$(tag)&per_page=$MAXOBJECTS")
     getalldata!(client, uri, Droplet)
 end
 
@@ -150,22 +156,10 @@ function getdroplet!(client::AbstractClient, droplet::Droplet)
     getdroplet!(client, droplet.id)
 end
 
-# List droplets by tag
-function getdropletsbytag!(client::AbstractClient, tag::String)
-    uri = joinpath(ENDPOINT, "droplets?tag_name=$(tag)&per_page=$MAXOBJECTS")
-    getalldata!(client, uri, Droplet)
-end
-
-function getalldropletkernels!(client::AbstractClient, droplet_id::Integer)
-    uri = joinpath(ENDPOINT, "droplets", "$(droplet_id)", "kernels")
-    data = getdata!(client, uri)
-    kernels = Array{Kernel, 1}(UndefInitializer(), length(data))
-
-    for (i, kernel) in enumerate(data)
-        kernels[i] = Kernel(kernel)
-    end
-
-    kernels
+# List all available kernels for a droplet
+function getalldropletkernels!(client::AbstractClient, dropletid::Integer)
+    uri = joinpath(ENDPOINT, "droplets", "$(dropletid)", "kernels")
+    getalldata!(client, uri, Kernel)
 end
 
 function getalldropletkernels!(client::AbstractClient, droplet::Droplet)
