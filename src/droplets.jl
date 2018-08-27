@@ -104,6 +104,9 @@ struct Droplet
             bend = DateTime(data["next_backup_window"]["end"][1:end-1])
             data["next_backup_window"] = Dict("start" => bst, "end" => bend)
         end
+        if !haskey(data, "tags")
+            data["tags"] = String[]
+        end
 
         new(
             data["id"],
@@ -287,3 +290,11 @@ function deletedroplet!(client::AbstractClient, tag::String)
 end
 
 # List neighbors for a droplet
+function getdropletneighbors!(client::AbstractClient, dropletid::Integer)
+    uri = joinpath(ENDPOINT, "droplets", "$dropletid", "neighbors")
+    getalldata!(client, uri, Droplet)
+end
+
+function getdropletneighbors!(client::AbstractClient, droplet::Droplet)
+    getdropletneighbors!(client, droplet.id)
+end

@@ -108,3 +108,21 @@ end;
 @testset "Delete a Droplet" begin
     @test deletedroplet!(client, droplet)
 end;
+
+neighbors = getdropletneighbors!(client, droplet)
+@testset "List Neighbors for a Droplet" begin
+    @test length(neighbors) == 1
+    @test neighbors[1].locked == false
+    @test isempty(neighbors[1].snapshotids)
+    @test neighbors[1].created_at == DateTime("2014-11-14T16:29:21")
+    @test neighbors[1].memory == 1024
+    @test neighbors[1].vcpus == 1
+    @test neighbors[1].name == "example.com"
+    @test neighbors[1].status == "active"
+    @test neighbors[1].id == 3164444
+    @test neighbors[1].disk == 25
+    @test neighbors[1].backupids == [7938002]
+    @test neighbors[1].sizeslug == "s-1vcpu-1gb"
+    @test isempty(neighbors[1].volumeids)
+    @test neighbors[1].features == ["backups", "ipv6", "virtio"]
+end;
