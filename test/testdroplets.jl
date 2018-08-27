@@ -126,3 +126,22 @@ neighbors = getdropletneighbors!(client, droplet)
     @test isempty(neighbors[1].volumeids)
     @test neighbors[1].features == ["backups", "ipv6", "virtio"]
 end;
+
+neighbors = getalldropletneighbors!(client)
+@testset "List all Droplet Neighbors" begin
+    @test length(neighbors) == 1
+    @test length(neighbors[1]) == 1
+    @test neighbors[1][1].locked == false
+    @test isempty(neighbors[1][1].snapshotids)
+    @test neighbors[1][1].created_at == DateTime("2014-11-14T16:29:21")
+    @test neighbors[1][1].memory == 1024
+    @test neighbors[1][1].vcpus == 1
+    @test neighbors[1][1].name == "example.com"
+    @test neighbors[1][1].status == "active"
+    @test neighbors[1][1].id == 3164444
+    @test neighbors[1][1].disk == 25
+    @test neighbors[1][1].backupids == [7938002]
+    @test neighbors[1][1].sizeslug == "s-1vcpu-1gb"
+    @test isempty(neighbors[1][1].volumeids)
+    @test neighbors[1][1].features == ["backups", "ipv6", "virtio"]
+end;

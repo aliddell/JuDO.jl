@@ -58,9 +58,20 @@ end
 
 function getalldata!(client::AbstractClient, uri::String, datatype::DataType)
     data = getdata!(client, uri)
-    collection = Array{datatype, 1}(UndefInitializer(), length(data))
-    for (i, obj) in enumerate(data)
-        collection[i] = datatype(obj)
+    if datatype <: Array
+        datatype = eltype(datatype)
+        collection = Array{Array{datatype, 1}, 1}()
+        for i = 1:length(data)
+            push!(collection, Array{datatype, 1}(UndefInitializer(), length(data[i])))
+            for (j, obj) in enumerate(data[i])
+                collection[i][j] = datatype(obj)
+            end
+        end
+    else
+        collection = Array{datatype, 1}(UndefInitializer(), length(data))
+        for (i, obj) in enumerate(data)
+            collection[i] = datatype(obj)
+        end
     end
 
     collection

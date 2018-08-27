@@ -298,3 +298,9 @@ end
 function getdropletneighbors!(client::AbstractClient, droplet::Droplet)
     getdropletneighbors!(client, droplet.id)
 end
+
+# List all droplet neighbors
+function getalldropletneighbors!(client)
+    uri = joinpath(ENDPOINT, "reports", "droplet_neighbors")
+    getalldata!(client, uri, Array{Droplet, 1})
+end
